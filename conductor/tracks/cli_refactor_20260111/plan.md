@@ -6,7 +6,7 @@ This phase focuses on fixing the "Muscle" (Docker) and preparing the "Brain" (Ba
 - [x] Task: Docker Privilege & Networking Upgrade [commit: f0744a1]
     - [ ] Sub-task: Write Tests: Verify `createContainer` config includes `Privileged: true` and `CapAdd`.
     - [ ] Sub-task: Implement: Update `mikky-os-backend/src/lib/docker.ts` to use correct security options and listen on `0.0.0.0`.
-- [ ] Task: Implement Rolling Summary Memory (The Librarian)
+- [x] Task: Implement Rolling Summary Memory (The Librarian) [commit: e4f3305]
     - [ ] Sub-task: Write Tests: Create unit tests for a `summarizeContext` function in `mikky-os-backend/src/lib/llm.ts` that mocks OpenAI responses.
     - [ ] Sub-task: Implement: Add `summarizeContext` function to call OpenRouter with a summarization prompt.
 - [ ] Task: Integrate Infinite Context into Agent Workflow
