@@ -469,8 +469,9 @@ export class WorkerManager {
             const hostConfig: Docker.HostConfig = {
                 AutoRemove: false, // We'll manually remove after getting logs
                 NetworkMode: 'bridge',
-                CapDrop: ['ALL'],
-                CapAdd: ['NET_RAW'], // Needed for nmap
+                // CapDrop: ['ALL'], // Removed to avoid conflict with Privileged
+                Privileged: true, // Required for advanced scans
+                CapAdd: ['NET_ADMIN', 'NET_RAW'], // Needed for nmap and other tools
                 Memory: 512 * 1024 * 1024, // 512MB limit
                 CpuShares: 256, // Low priority
             };

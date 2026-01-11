@@ -385,7 +385,7 @@ async function pushLog(
 }
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
