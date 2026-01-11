@@ -6,7 +6,7 @@
  */
 
 import { inngest } from './client.js';
-import { chatWithTools, MIKKY_SYSTEM_PROMPT, type ChatMessage, type ToolCall } from '../lib/llm.js';
+import { chatWithTools, MIKKY_SYSTEM_PROMPT, summarizeContext, type ChatMessage, type ToolCall } from '../lib/llm.js';
 import { AGENT_TOOLS, executeToolCall, formatToolResult } from '../lib/tools.js';
 import { workerManager } from '../lib/docker.js';
 import { convex } from '../lib/convex.js';
@@ -144,6 +144,20 @@ export const agentFunction = inngest.createFunction(
                 }
             } catch (err) {
                 console.warn('[AGENT] Failed to fetch history from Convex:', err);
+            }
+
+            // INFINITE CONTEXT STRATEGY
+            // If history is too long, summarize it to save tokens and maintain focus
+            if (convexHistory.length > 3) {
+                await pushStatus(sessionId, 'analyzing', 'Summarizing previous context (Infinite Memory)...');
+                const summary = await summarizeContext(convexHistory);
+                console.log(`[AGENT] Generated context summary: ${summary.substring(0, 50)}...`);
+
+                return [
+                    { role: 'system', content: MIKKY_SYSTEM_PROMPT },
+                    { role: 'system', content: `PREVIOUS CONTEXT SUMMARY:\n${summary}` },
+                    { role: 'user', content: message },
+                ];
             }
 
             // Build full history: System Prompt + Persisted History + New User Message
