@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+/* =====================================================
+   MIKKY OS - Design Tokens
+   AI-Powered Pentest Operation System
+   ===================================================== */
+
+:root {
+  /* Primary Colors */
+  --color-primary: var(--color-cyan-500);
+  --color-primary-hover: var(--color-cyan-400);
+  --color-primary-muted: color-mix(in srgb, var(--color-cyan-500) 10%, transparent);
+
+  /* Secondary Colors */
+  --color-secondary: var(--color-emerald-500);
+  --color-secondary-hover: var(--color-emerald-400);
+  --color-secondary-muted: color-mix(in srgb, var(--color-emerald-500) 10%, transparent);
+
+  /* Neutral Colors */
+  --color-bg-primary: var(--color-zinc-950);
+  --color-bg-secondary: var(--color-zinc-900);
+  --color-border: var(--color-zinc-800);
+  --color-text-primary: var(--color-zinc-100);
+  --color-text-secondary: var(--color-zinc-400);
+  --color-text-muted: var(--color-zinc-500);
+
+  /* Typography */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Effects */
+  --neon-glow-cyan: 0 0 15px rgba(6, 182, 212, 0.5);
+  --neon-glow-emerald: 0 0 15px rgba(16, 185, 129, 0.5);
+  --glass-bg: rgba(24, 24, 27, 0.9);
+  --glass-blur: blur(8px);
+}
+
+/* =====================================================
+   Base Styles
+   ===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-zinc-950);
+  color: var(--color-zinc-100);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* =====================================================
+   Typography
+   ===================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* =====================================================
+   Selection
+   ===================================================== */
+
+::selection {
+  background-color: rgba(6, 182, 212, 0.3);
+}
+
+/* =====================================================
+   Scrollbar Styling
+   ===================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-zinc-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-zinc-700);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-zinc-600);
+}
+
+/* =====================================================
+   Custom Utility Classes
+   ===================================================== */
+
+@layer components {
+
+  /* Glassmorphism effect */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+
+  /* Neon glow effects */
+  .neon-glow-cyan {
+    box-shadow: var(--neon-glow-cyan);
+  }
+
+  .neon-glow-emerald {
+    box-shadow: var(--neon-glow-emerald);
+  }
+
+  /* Neon text glow */
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+  }
+
+  .text-glow-emerald {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  }
+}
+
+/* =====================================================
+   Animations
+   ===================================================== */
+
+@layer utilities {
+  .animate-in {
+    animation: animate-in 0.3s ease-out;
+  }
+
+  .fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Pulse animation for status indicators */
+  .animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+  }
+}

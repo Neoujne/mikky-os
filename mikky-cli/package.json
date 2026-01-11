@@ -1,0 +1,43 @@
+{
+    "name": "mikky-cli",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "MIKKY CLI - The Interactive Hacking Agent",
+    "main": "dist/index.js",
+    "bin": {
+        "mikky": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "start": "node dist/index.js",
+        "clean": "rimraf dist"
+    },
+    "keywords": [
+        "cli",
+        "hacking",
+        "security",
+        "repl",
+        "agent"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.7.9",
+        "chalk": "^5.4.1",
+        "commander": "^13.1.0",
+        "conf": "^13.1.0",
+        "figlet": "^1.8.0",
+        "inquirer": "^12.4.2",
+        "ora": "^8.1.1"
+    },
+    "devDependencies": {
+        "@types/figlet": "^1.7.0",
+        "@types/node": "^22.10.5",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.7.3"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

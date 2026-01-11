@@ -1,0 +1,16 @@
+# Dependencies & Builds
+node_modules/
+dist/
+coverage/
+npm-debug.log
+*.log
+
+# Secrets & Environment
+.env
+.env.local
+.convex/
+.DS_Store
+
+# Internal Documentation (DO NOT PUSH)
+product-plan/
+conductor/
