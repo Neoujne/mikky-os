@@ -247,3 +247,35 @@ export function isConfigured(): boolean {
 export function getCurrentModel(): string {
     return DEFAULT_MODEL;
 }
+
+/**
+ * Summarize a conversation history into a concise technical state
+ */
+export async function summarizeContext(messages: ChatMessage[]): Promise<string> {
+    if (!OPENROUTER_API_KEY) {
+         throw new Error('OPENROUTER_API_KEY is not set');
+    }
+
+    try {
+        // Filter out system messages to avoid confusing the summarizer
+        const conversationHistory = messages.filter(m => m.role !== 'system');
+        
+        const response = await chat({
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Summarize the previous findings (User inputs and Assistant tool outputs) into a concise technical state. Focus on open ports, vulnerabilities found, and current objective. Ignore conversational filler.'
+                },
+                ...conversationHistory
+            ],
+            model: DEFAULT_MODEL,
+            temperature: 0.3, // Low temp for factual summary
+        });
+
+        return response.content || 'No summary generated.';
+    } catch (error) {
+        console.error('[LLM] Summarization error:', error);
+        return 'Failed to generate summary.';
+    }
+}
+
