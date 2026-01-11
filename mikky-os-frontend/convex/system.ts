@@ -40,6 +40,7 @@ export const checkWorkerHealth = internalAction({
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-mikky-secret': process.env.MIKKY_SECRET_KEY || 'dev-secret-key',
                 },
                 // 10 second timeout
                 signal: AbortSignal.timeout(10000),
@@ -144,7 +145,10 @@ export const verifyWorkerStatus = action({
         try {
             const response = await fetch(`${BACKEND_URL}/api/health`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-mikky-secret': process.env.MIKKY_SECRET_KEY || 'dev-secret-key',
+                },
                 signal: AbortSignal.timeout(5000), // Shorter timeout for UI feedback
             });
 

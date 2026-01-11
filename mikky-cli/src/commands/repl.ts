@@ -19,13 +19,18 @@ import {
 } from '../lib/ui.js';
 import { getAgentClient, type AgentResponse } from '../lib/agent-client.js';
 import { runAuth, runLogout, isAuthenticated } from './auth.js';
+import Conf from 'conf';
+
+const config = new Conf({ projectName: 'mikky-cli' });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // REPL STATE
 // ═══════════════════════════════════════════════════════════════════════════
 
 let isRunning = true;
-const agentClient = getAgentClient();
+
+// Initialize lazily
+let agentClient: ReturnType<typeof getAgentClient>;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LOCAL COMMANDS (start with /)
@@ -228,6 +233,22 @@ async function handleActionResponse(response: AgentResponse): Promise<void> {
  * Start the interactive REPL
  */
 export async function startRepl(): Promise<void> {
+  // Restore session
+  const lastSessionId = config.get('lastSessionId') as string | undefined;
+  if (lastSessionId) {
+    printSystemMessage(`Resuming session: ${colors.dim(lastSessionId)}`);
+  }
+
+  // Initialize client with persisted ID (or generate new)
+  agentClient = getAgentClient(lastSessionId);
+
+  // Save the (potentially new) ID
+  const currentSessionId = agentClient.getSessionId();
+  if (currentSessionId !== lastSessionId) {
+    config.set('lastSessionId', currentSessionId);
+    printSystemMessage(`Started new session: ${colors.dim(currentSessionId)}`);
+  }
+
   // Clear screen and show banner
   renderBanner();
   printTips();

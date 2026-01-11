@@ -53,9 +53,9 @@ export class AgentClient {
     private history: ConversationMessage[] = [];
     private sessionId: string;
 
-    constructor(baseUrl?: string) {
+    constructor(baseUrl?: string, sessionId?: string) {
         this.baseUrl = baseUrl || process.env.MIKKY_BACKEND_URL || 'http://localhost:3000';
-        this.sessionId = this.generateSessionId();
+        this.sessionId = sessionId || this.generateSessionId();
 
         this.client = axios.create({
             baseURL: this.baseUrl,
@@ -254,9 +254,9 @@ export class AgentClient {
 // Singleton instance
 let agentInstance: AgentClient | null = null;
 
-export function getAgentClient(): AgentClient {
+export function getAgentClient(sessionId?: string): AgentClient {
     if (!agentInstance) {
-        agentInstance = new AgentClient();
+        agentInstance = new AgentClient(undefined, sessionId);
     }
     return agentInstance;
 }
