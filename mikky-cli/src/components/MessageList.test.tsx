@@ -2,7 +2,7 @@
 import React from 'react';
 import { render } from 'ink-testing-library';
 import { describe, it, expect } from 'vitest';
-import { MessageList, Message } from './MessageList';
+import { MessageList, Message } from './MessageList.js';
 
 describe('MessageList', () => {
     it('should render messages with correct roles', () => {

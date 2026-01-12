@@ -11,7 +11,17 @@
         "build": "tsc",
         "dev": "tsc --watch",
         "start": "node dist/index.js",
+        "test": "vitest run",
         "clean": "rimraf dist"
+    },
+    "vitest": {
+        "exclude": [
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/cypress/**",
+            "**/.{idea,git,cache,output,temp}/**",
+            "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*"
+        ]
     },
     "keywords": [
         "cli",
@@ -44,6 +54,7 @@
         "@types/meow": "^5.0.0",
         "@types/node": "^22.10.5",
         "@types/react": "^19.2.8",
+        "ink-testing-library": "^4.0.0",
         "rimraf": "^6.0.1",
         "typescript": "^5.7.3",
         "vitest": "^4.0.16"

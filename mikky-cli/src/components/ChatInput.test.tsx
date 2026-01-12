@@ -2,7 +2,7 @@
 import React from 'react';
 import { render } from 'ink-testing-library';
 import { describe, it, expect, vi } from 'vitest';
-import { ChatInput } from './ChatInput';
+import { ChatInput } from './ChatInput.js';
 
 describe('ChatInput', () => {
 	it('should render with placeholder', () => {
