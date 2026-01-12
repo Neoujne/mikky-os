@@ -1,6 +1,6 @@
 # Implementation Plan - Master Overhaul: React Ink CLI, Rolling Memory & Docker Root Upgrade
 
-## Phase 1: Infrastructure & Backend Core
+## Phase 1: Infrastructure & Backend Core [checkpoint: 74e7328]
 This phase focuses on fixing the "Muscle" (Docker) and preparing the "Brain" (Backend) for infinite context.
 
 - [x] Task: Docker Privilege & Networking Upgrade [commit: f0744a1]
