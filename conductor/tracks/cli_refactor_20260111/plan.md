@@ -31,7 +31,7 @@ This phase establishes the React Ink environment and basic UI shell.
 ## Phase 3: Interactive Components & Streaming
 This phase adds the "Gemini-style" interactivity and live log streaming.
 
-- [ ] Task: Implement Inline Authorization Component
+- [x] Task: Implement Inline Authorization Component [commit: 1a69769]
     - [ ] Sub-task: Write Tests: Test `<AuthPrompt>` renders Yes/No options and captures selection.
     - [ ] Sub-task: Implement: Create `<AuthPrompt>` using `ink-select-input`. Add locking state after selection.
 - [ ] Task: Connect CLI to Convex & Streaming Logs
