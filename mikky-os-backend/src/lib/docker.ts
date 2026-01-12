@@ -240,6 +240,7 @@ export class WorkerManager {
                 name: sessionName,
                 Tty: true, // Keep terminal open
                 StopSignal: 'SIGKILL', // Force kill on stop to prevent hanging
+                User: '0', // Force root execution
                 HostConfig: {
                     AutoRemove: false,
                     NetworkMode: 'bridge',
@@ -488,6 +489,7 @@ export class WorkerManager {
                 name: containerId,
                 Tty: false,
                 HostConfig: hostConfig,
+                User: '0', // Force root execution
                 Labels: {
                     'mikky.scanRunId': scanRunId,
                     'mikky.stage': stage,

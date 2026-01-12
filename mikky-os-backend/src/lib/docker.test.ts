@@ -1,82 +1,66 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
-// 1. Mock Convex
-vi.mock('./convex.js', () => ({
+// Mock convex module before importing docker
+vi.mock('./convex', () => ({
     convex: {
-        mutation: vi.fn(),
-        query: vi.fn(),
+        mutation: vi.fn().mockResolvedValue(null),
+        query: vi.fn().mockResolvedValue(null)
     }
 }));
 
-// 2. Define mocks using vi.hoisted
-const { mockCreateContainer, mockListContainers, mockListImages, mockGetContainer } = vi.hoisted(() => {
-    return {
-        mockCreateContainer: vi.fn(),
-        mockListContainers: vi.fn(),
-        mockListImages: vi.fn(),
-        mockGetContainer: vi.fn(),
-    };
-});
+import { workerManager } from './docker';
 
-// 3. Mock Dockerode
-vi.mock('dockerode', () => {
-    return {
-        default: class MockDocker {
-            createContainer = mockCreateContainer;
-            listContainers = mockListContainers;
-            listImages = mockListImages;
-            getContainer = mockGetContainer;
-        }
-    };
-});
+// Increase timeout for Docker operations
+const DOCKER_TIMEOUT = 60000;
 
-import { WorkerManager } from './docker';
+describe('WorkerManager Privileges', () => {
+    const scanId = 'test-privileges-' + Date.now();
 
-describe('WorkerManager', () => {
-    let workerManager: WorkerManager;
-
-    beforeEach(() => {
-        vi.clearAllMocks();
-        
-        // Setup default mock behaviors
-        mockCreateContainer.mockResolvedValue({
-            start: vi.fn().mockResolvedValue(undefined),
-            wait: vi.fn().mockResolvedValue({ StatusCode: 0 }),
-            logs: vi.fn().mockResolvedValue(Buffer.from('')), 
-            remove: vi.fn().mockResolvedValue(undefined),
-            kill: vi.fn().mockResolvedValue(undefined),
-             exec: vi.fn().mockResolvedValue({
-                 start: vi.fn().mockResolvedValue({}),
-                 inspect: vi.fn().mockResolvedValue({ ExitCode: 0 })
-            })
-        });
-        mockListContainers.mockResolvedValue([]);
-        mockListImages.mockResolvedValue([]);
-        
-        // Reset singleton
-        (WorkerManager as any).instance = undefined;
-        // Re-instantiate to use fresh mocks
-        workerManager = WorkerManager.getInstance();
-    });
-
-    it('runTool should create container with Privileged: true and correct CapAdd', async () => {
-        const options = {
-            command: 'nmap -F localhost',
-            scanRunId: 'test-scan',
+    it('should have root privileges (uid=0)', async () => {
+        const result = await workerManager.runTool({
+            command: 'id -u',
+            scanRunId: scanId,
             stage: 'test',
-            tool: 'nmap'
-        };
+            tool: 'id',
+            timeout: DOCKER_TIMEOUT
+        });
 
-        // Mock demuxDockerStream
-        (workerManager as any).demuxDockerStream = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+        if (!result.success) {
+            console.error('Command failed:', result.stderr);
+        }
 
-        await workerManager.runTool(options);
+        expect(result.success).toBe(true);
+        expect(result.stdout.trim()).toBe('0');
+    }, DOCKER_TIMEOUT);
 
-        expect(mockCreateContainer).toHaveBeenCalledWith(expect.objectContaining({
-            HostConfig: expect.objectContaining({
-                Privileged: true,
-                CapAdd: expect.arrayContaining(['NET_ADMIN', 'NET_RAW'])
-            })
-        }));
-    });
+    it('should have NET_ADMIN/NET_RAW capability (Nmap SYN Scan)', async () => {
+        // Nmap SYN scan (-sS) requires raw sockets
+        const result = await workerManager.runTool({
+            command: 'nmap -sS -p 80 -n --max-retries 0 127.0.0.1', 
+            scanRunId: scanId,
+            stage: 'test',
+            tool: 'nmap',
+            timeout: DOCKER_TIMEOUT
+        });
+
+        if (!result.success) {
+            console.error('Nmap failed:', result.stderr);
+        }
+
+        // Check for success markers
+        expect(result.stdout).toContain('Nmap scan report');
+        
+        // Check for failure markers
+        const errorMarkers = [
+            'Operation not permitted',
+            'requires root privileges',
+            'dnet: Failed to open device',
+            'Permission denied'
+        ];
+        
+        errorMarkers.forEach(marker => {
+            expect(result.stderr).not.toContain(marker);
+            expect(result.stdout).not.toContain(marker);
+        });
+    }, DOCKER_TIMEOUT);
 });
