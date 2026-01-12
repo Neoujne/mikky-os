@@ -23,7 +23,7 @@ This phase establishes the React Ink environment and basic UI shell.
 - [x] Task: Implement Persistent Input & Auto-Focus [commit: 6268f7d]
     - [ ] Sub-task: Write Tests: Test `<Input>` component renders and maintains focus.
     - [ ] Sub-task: Implement: Create `<ChatInput>` component with auto-focus and 5-line expansion logic.
-- [ ] Task: Implement Scrollable Chat History
+- [x] Task: Implement Scrollable Chat History [commit: b469fa5]
     - [ ] Sub-task: Write Tests: Test `<MessageList>` renders an array of messages.
     - [ ] Sub-task: Implement: Create `<MessageList>` component using `ink-scroll-area` or custom logic to handle overflow.
 - [ ] Task: Conductor - User Manual Verification 'CLI Foundation & Ink Setup' (Protocol in workflow.md)
