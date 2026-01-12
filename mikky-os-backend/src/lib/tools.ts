@@ -101,7 +101,7 @@ export const AGENT_TOOLS: ChatCompletionTool[] = [
         type: 'function',
         function: {
             name: 'subdomain_enum',
-            description: 'Enumerate subdomains of a target domain to discover additional attack surface.',
+            description: 'Enumerate subdomains of a target domain using subfinder to discover additional attack surface.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -111,6 +111,179 @@ export const AGENT_TOOLS: ChatCompletionTool[] = [
                     },
                 },
                 required: ['domain'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'amass_enum',
+            description: 'Perform advanced subdomain enumeration and network mapping using Amass.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    domain: {
+                        type: 'string',
+                        description: 'The root domain to enumerate (e.g., "example.com")',
+                    },
+                    intensity: {
+                        type: 'string',
+                        enum: ['passive', 'active'],
+                        description: 'Passive (no direct traffic) or Active (DNS resolution/brute)',
+                        default: 'passive',
+                    },
+                },
+                required: ['domain'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'theharvester_search',
+            description: 'Gather emails, names, subdomains, IPs and URLs using multiple public data sources.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    domain: {
+                        type: 'string',
+                        description: 'Domain to search for (e.g., "example.com")',
+                    },
+                    source: {
+                        type: 'string',
+                        description: 'Data source (e.g., "google", "bing", "crtsh", "all")',
+                        default: 'all',
+                    },
+                },
+                required: ['domain'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'nuclei_scan',
+            description: 'Run targeted vulnerability scans using Nuclei templates.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    target: {
+                        type: 'string',
+                        description: 'Target URL or domain to scan',
+                    },
+                    template: {
+                        type: 'string',
+                        description: 'Specific template or category (e.g., "cves", "vulnerabilities", "technologies")',
+                        default: 'vulnerabilities',
+                    },
+                    severity: {
+                        type: 'string',
+                        enum: ['info', 'low', 'medium', 'high', 'critical'],
+                        description: 'Filter findings by severity',
+                    },
+                },
+                required: ['target'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'nikto_scan',
+            description: 'Perform a comprehensive web server security scan using Nikto.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    target: {
+                        type: 'string',
+                        description: 'Target URL or IP (e.g., "http://example.com")',
+                    },
+                },
+                required: ['target'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'whatweb_probe',
+            description: 'Fingerprint web technologies, CMS, and server versions using WhatWeb.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    target: {
+                        type: 'string',
+                        description: 'Target URL or domain',
+                    },
+                    aggression: {
+                        type: 'number',
+                        description: 'Aggression level (1-4). 1 is stealthy, 3 is aggressive.',
+                        default: 1,
+                    },
+                },
+                required: ['target'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'gobuster_dir',
+            description: 'Brute-force discover hidden directories and files on a web server.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    url: {
+                        type: 'string',
+                        description: 'Base URL to scan (e.g., "http://example.com/")',
+                    },
+                    wordlist: {
+                        type: 'string',
+                        enum: ['common', 'medium', 'big'],
+                        description: 'Size of wordlist to use',
+                        default: 'common',
+                    },
+                },
+                required: ['url'],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'sqlmap_scan',
+            description: 'Detect and exploit SQL injection vulnerabilities in a target URL.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    url: {
+                        type: 'string',
+                        description: 'Target URL with parameters (e.g., "http://example.com/page.php?id=1")',
+                    },
+                    batch: {
+                        type: 'boolean',
+                        description: 'Never ask for user input, use default behavior',
+                        default: true,
+                    },
+                    risk: {
+                        type: 'number',
+                        description: 'Risk level (1-3)',
+                        default: 1,
+                    },
+                    level: {
+                        type: 'number',
+                        description: 'Level of tests to perform (1-5)',
+                        default: 1,
+                    },
+                },
+                required: ['url'],
                 additionalProperties: false,
             },
         },
@@ -171,8 +344,54 @@ function buildCommand(toolName: string, args: Record<string, unknown>): string {
 
         case 'subdomain_enum': {
             const domain = args.domain as string;
-            // Use subfinder if available, fallback to DNS brute
-            return `subfinder -d ${domain} -silent 2>/dev/null || echo "Subdomain enumeration requires subfinder"`;
+            return `subfinder -d ${domain} -silent`;
+        }
+
+        case 'amass_enum': {
+            const domain = args.domain as string;
+            const intensity = (args.intensity as string) || 'passive';
+            const flag = intensity === 'active' ? 'enum' : 'enum -passive';
+            return `amass ${flag} -d ${domain}`;
+        }
+
+        case 'theharvester_search': {
+            const domain = args.domain as string;
+            const source = (args.source as string) || 'all';
+            return `theHarvester -d ${domain} -b ${source}`;
+        }
+
+        case 'nuclei_scan': {
+            const target = args.target as string;
+            const template = (args.template as string) || 'vulnerabilities';
+            const severity = args.severity as string;
+            let cmd = `nuclei -u ${target} -t ${template} -silent`;
+            if (severity) cmd += ` -severity ${severity}`;
+            return cmd;
+        }
+
+        case 'nikto_scan': {
+            const target = args.target as string;
+            return `nikto -h ${target} -Tuning 123bde`;
+        }
+
+        case 'whatweb_probe': {
+            const target = args.target as string;
+            const aggression = (args.aggression as number) || 1;
+            return `whatweb -a ${aggression} ${target}`;
+        }
+
+        case 'gobuster_dir': {
+            const url = args.url as string;
+            const wordlist = (args.wordlist as string) || 'common';
+            const wordlistPath = `/usr/share/wordlists/dirb/${wordlist}.txt`;
+            return `gobuster dir -u ${url} -w ${wordlistPath} -z -q`;
+        }
+
+        case 'sqlmap_scan': {
+            const url = args.url as string;
+            const risk = (args.risk as number) || 1;
+            const level = (args.level as number) || 1;
+            return `sqlmap -u "${url}" --batch --risk ${risk} --level ${level} --random-agent`;
         }
 
         default:
