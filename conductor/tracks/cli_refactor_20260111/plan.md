@@ -14,7 +14,7 @@ This phase focuses on fixing the "Muscle" (Docker) and preparing the "Brain" (Ba
     - [ ] Sub-task: Implement: Update `mikky-os-backend/src/inngest/agent.ts` to fetch full history from Convex and apply the summarization logic.
 - [ ] Task: Conductor - User Manual Verification 'Infrastructure & Backend Core' (Protocol in workflow.md)
 
-## Phase 2: CLI Foundation & Ink Setup
+## Phase 2: CLI Foundation & Ink Setup [checkpoint: 5180832]
 This phase establishes the React Ink environment and basic UI shell.
 
 - [x] Task: Initialize React Ink Project [commit: 532f8ed]
