@@ -9,7 +9,7 @@ This phase focuses on fixing the "Muscle" (Docker) and preparing the "Brain" (Ba
 - [x] Task: Implement Rolling Summary Memory (The Librarian) [commit: e4f3305]
     - [ ] Sub-task: Write Tests: Create unit tests for a `summarizeContext` function in `mikky-os-backend/src/lib/llm.ts` that mocks OpenAI responses.
     - [ ] Sub-task: Implement: Add `summarizeContext` function to call OpenRouter with a summarization prompt.
-- [ ] Task: Integrate Infinite Context into Agent Workflow
+- [x] Task: Integrate Infinite Context into Agent Workflow [commit: 20550b4]
     - [ ] Sub-task: Write Tests: Mock `inngest/agent.ts` to verify it calls `summarizeContext` when history > 3 messages.
     - [ ] Sub-task: Implement: Update `mikky-os-backend/src/inngest/agent.ts` to fetch full history from Convex and apply the summarization logic.
 - [ ] Task: Conductor - User Manual Verification 'Infrastructure & Backend Core' (Protocol in workflow.md)
