@@ -31,6 +31,7 @@ export const createRun = mutation({
                 status: 'thinking',
                 thought: 'Initializing agent...',
                 logs: [],
+                rawLogs: [],
                 finalResponse: undefined,
                 currentTool: undefined,
                 lastUpdated: Date.now(),
@@ -44,6 +45,7 @@ export const createRun = mutation({
             status: 'thinking',
             thought: 'Initializing agent...',
             logs: [],
+            rawLogs: [],
             history: [], // Initialize empty history
             lastUpdated: Date.now(),
         });
@@ -67,8 +69,10 @@ export const updateStatus = mutation({
         ),
         thought: v.optional(v.string()),
         log: v.optional(v.string()),
+        rawLog: v.optional(v.string()),
         currentTool: v.optional(v.string()),
         finalResponse: v.optional(v.string()),
+        finalReport: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const run = await ctx.db
@@ -83,6 +87,8 @@ export const updateStatus = mutation({
                 status: args.status,
                 thought: args.thought || '',
                 logs: args.log ? [args.log] : [],
+                rawLogs: args.rawLog ? [args.rawLog] : [],
+                finalReport: args.finalReport,
                 currentTool: args.currentTool,
                 finalResponse: args.finalResponse,
                 lastUpdated: Date.now(),
@@ -108,9 +114,18 @@ export const updateStatus = mutation({
             updates.finalResponse = args.finalResponse;
         }
 
+        if (args.finalReport !== undefined) {
+            updates.finalReport = args.finalReport;
+        }
+
         // Append log if provided
         if (args.log) {
-            updates.logs = [...run.logs, args.log];
+            updates.logs = [...(run.logs || []), args.log];
+        }
+
+        // Append raw log if provided
+        if (args.rawLog) {
+            updates.rawLogs = [...(run.rawLogs || []), args.rawLog];
         }
 
         await ctx.db.patch(run._id, updates);
@@ -165,6 +180,8 @@ export const getRunStatus = query({
             status: run.status,
             thought: run.thought,
             logs: run.logs,
+            rawLogs: run.rawLogs,
+            finalReport: run.finalReport,
             currentTool: run.currentTool,
             finalResponse: run.finalResponse,
             lastUpdated: run.lastUpdated,

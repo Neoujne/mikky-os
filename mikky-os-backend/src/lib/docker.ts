@@ -390,8 +390,11 @@ export class WorkerManager {
                 );
 
                 if (stdout.length > 0) {
-                    const summary = summarizeOutput(stdout, 20);
-                    await this.logToConvex(scanRunId, 'info', stage, summary);
+                    // Log the FULL output for reporting, capped at Convex limit (~1MB)
+                    const fullLog = stdout.length > 900000 
+                        ? stdout.substring(0, 900000) + "\n\n... [Log truncated due to database size limits] ..."
+                        : stdout;
+                    await this.logToConvex(scanRunId, 'info', stage, fullLog);
                 }
             } else {
                 await this.logToConvex(
@@ -561,10 +564,12 @@ export class WorkerManager {
                     `[${tool.toUpperCase()}] Completed in ${duration}ms (${stdout.split('\n').length} lines)`
                 );
 
-                // Log summary of output
+                // Log full output for reporting
                 if (stdout.length > 0) {
-                    const summary = summarizeOutput(stdout, 20);
-                    await this.logToConvex(scanRunId, 'info', stage, summary);
+                    const fullLog = stdout.length > 900000 
+                        ? stdout.substring(0, 900000) + "\n\n... [Log truncated due to database size limits] ..."
+                        : stdout;
+                    await this.logToConvex(scanRunId, 'info', stage, fullLog);
                 }
             } else {
                 await this.logToConvex(

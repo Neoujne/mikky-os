@@ -150,6 +150,8 @@ export default defineSchema({
         finalResponse: v.optional(v.string()), // Final answer
         currentTool: v.optional(v.string()), // Currently executing tool
         lastUpdated: v.number(),         // Timestamp for freshness
+        rawLogs: v.optional(v.array(v.string())), // NEW: Full raw tool output
+        finalReport: v.optional(v.string()), // NEW: Structured pentest report
         // NEW: Chat history for persistent memory
         history: v.optional(v.array(v.object({
             role: v.string(),

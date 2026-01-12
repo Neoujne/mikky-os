@@ -50,6 +50,7 @@ async function pushStatus(
     thought: string,
     options?: {
         log?: string;
+        rawLog?: string;
         currentTool?: string;
         finalResponse?: string;
     }
@@ -62,6 +63,7 @@ async function pushStatus(
             status,
             thought,
             log: options?.log,
+            rawLog: options?.rawLog,
             currentTool: options?.currentTool,
             finalResponse: options?.finalResponse,
         });
@@ -175,7 +177,7 @@ export const agentFunction = inngest.createFunction(
         // =====================================================================
         let iterations = 0;
         let finalResponse: string | null = null;
-        let currentHistory = [...history];
+        let currentHistory = [...(history as unknown as ChatMessage[])];
 
         while (iterations < MAX_TOOL_ITERATIONS && !finalResponse) {
             iterations++;
@@ -232,7 +234,10 @@ export const agentFunction = inngest.createFunction(
                         sessionId,
                         'analyzing',
                         `Analyzing ${toolCall.function.name} results...`,
-                        { log: `[${toolCall.function.name}] ${result.success ? 'Completed' : 'Failed'}` }
+                        { 
+                            log: `[${toolCall.function.name}] ${result.success ? 'Completed' : 'Failed'}`,
+                            rawLog: result.rawOutput 
+                        }
                     );
 
                     // Add tool result to history

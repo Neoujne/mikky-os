@@ -51,6 +51,24 @@ export const getByScanRun = query({
     },
 });
 
+// Get ALL logs for a scan run (for reporting)
+export const getAllByScanRun = query({
+    args: {
+        scanRunId: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const scanId = ctx.db.normalizeId("scanRuns", args.scanRunId);
+        if (!scanId) {
+            return [];
+        }
+
+        return await ctx.db
+            .query("scanLogs")
+            .withIndex("by_scanRun", (q) => q.eq("scanRunId", scanId))
+            .collect();
+    },
+});
+
 // Get recent logs across all active scans (for System Console)
 export const tail = query({
     args: {

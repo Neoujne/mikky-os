@@ -7,6 +7,8 @@
 
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 import { workerManager } from './docker.js';
+import { chat } from './llm.js';
+import { convex } from './convex.js';
 
 // ============================================================================
 // TOOL DEFINITIONS (OpenAI Function Calling Format)
@@ -258,32 +260,16 @@ export const AGENT_TOOLS: ChatCompletionTool[] = [
     {
         type: 'function',
         function: {
-            name: 'sqlmap_scan',
-            description: 'Detect and exploit SQL injection vulnerabilities in a target URL.',
+            name: 'generate_final_report',
+            description: 'Synthesize all findings into a professional Markdown penetration testing report.',
             parameters: {
                 type: 'object',
                 properties: {
-                    url: {
+                    focus_areas: {
                         type: 'string',
-                        description: 'Target URL with parameters (e.g., "http://example.com/page.php?id=1")',
-                    },
-                    batch: {
-                        type: 'boolean',
-                        description: 'Never ask for user input, use default behavior',
-                        default: true,
-                    },
-                    risk: {
-                        type: 'number',
-                        description: 'Risk level (1-3)',
-                        default: 1,
-                    },
-                    level: {
-                        type: 'number',
-                        description: 'Level of tests to perform (1-5)',
-                        default: 1,
+                        description: 'Specific areas to highlight in the report (e.g., "SQL Injection", "Exposed Ports")',
                     },
                 },
-                required: ['url'],
                 additionalProperties: false,
             },
         },
@@ -297,6 +283,7 @@ export const AGENT_TOOLS: ChatCompletionTool[] = [
 interface ToolResult {
     success: boolean;
     output: string;
+    rawOutput: string;
     error?: string;
 }
 
@@ -394,6 +381,10 @@ function buildCommand(toolName: string, args: Record<string, unknown>): string {
             return `sqlmap -u "${url}" --batch --risk ${risk} --level ${level} --random-agent`;
         }
 
+        case 'generate_final_report': {
+            return `echo "Generating final report for session ${args.sessionId || 'current'}..."`;
+        }
+
         default:
             throw new Error(`Unknown tool: ${toolName}`);
     }
@@ -409,6 +400,85 @@ export async function executeToolCall(
 ): Promise<ToolResult> {
     console.log(`[TOOLS] Executing: ${toolName}`, args);
 
+    // SPECIAL CASE: generate_final_report (Pure AI synthesis, no Docker)
+    if (toolName === 'generate_final_report') {
+        try {
+            const isCliSession = sessionId.startsWith('cli-');
+            let rawLogsText = '';
+
+            if (isCliSession) {
+                const run = await convex.query('agent:getRunStatus' as any, { sessionId }) as any;
+                rawLogsText = (run?.rawLogs || []).join('\n---\n');
+            } else {
+                const logs = await convex.query('scanLogs:getAllByScanRun' as any, { scanRunId: sessionId }) as any[];
+                rawLogsText = logs.map(l => `[${l.timestamp}] [${l.level}] ${l.message}`).join('\n');
+            }
+
+            if (!rawLogsText || rawLogsText.length < 10) {
+                return {
+                    success: false,
+                    output: 'Insufficient evidence to generate a report. Run some scans first!',
+                    rawOutput: '',
+                    error: 'Empty log history'
+                };
+            }
+
+            const prompt = `You are a Senior Penetration Tester. Generate a professional Markdown report based on the following RAW tool logs.
+            
+TEMPLATE:
+# Penetration Test Report: [Target]
+## 1. Executive Summary
+[High-level findings and risk posture]
+## 2. Methodology
+[List tools used: Nmap, Nuclei, etc.]
+## 3. Vulnerability Findings
+### [Finding Name]
+- **Severity:** [Critical/High/Medium/Low/Info]
+- **Evidence:** [Snippet from raw logs]
+- **Remediation:** [How to fix]
+
+RAW LOG DATA:
+${rawLogsText.substring(0, 50000)}
+`;
+
+            const reportResponse = await chat({
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.3
+            });
+
+            const reportContent = reportResponse.content || 'Failed to generate report content.';
+
+            // Save to database
+            if (isCliSession) {
+                await convex.mutation('agent:updateStatus' as any, {
+                    sessionId,
+                    status: 'completed',
+                    thought: 'Generated final report.',
+                    finalReport: reportContent
+                });
+            } else {
+                await convex.mutation('scans:updateStatus' as any, {
+                    id: sessionId,
+                    aiSummary: reportContent
+                });
+            }
+
+            return {
+                success: true,
+                output: `Final report generated and persisted to database. Summary:\n\n${reportContent.substring(0, 500)}...`,
+                rawOutput: reportContent
+            };
+        } catch (err) {
+            console.error('[TOOLS] Report generation failed:', err);
+            return {
+                success: false,
+                output: 'Failed to synthesize report.',
+                rawOutput: '',
+                error: err instanceof Error ? err.message : 'Unknown error'
+            };
+        }
+    }
+
     try {
         const command = buildCommand(toolName, args);
         console.log(`[TOOLS] Command: ${command}`);
@@ -423,20 +493,32 @@ export async function executeToolCall(
         });
 
         if (result.success) {
+            const rawOutput = result.stdout || 'Command completed with no output.';
+            let output = rawOutput;
+
+            // HYBRID OUTPUT STRATEGY: Truncate for Agent context window
+            // The full raw logs are saved to the database via WorkerManager
+            if (output.length > 2000) {
+                output = output.substring(0, 2000) + "\n\n... [Output truncated. Full logs saved to database] ...";
+            }
+
             return {
                 success: true,
-                output: result.stdout || 'Command completed with no output.',
+                output: output,
+                rawOutput: rawOutput,
             };
         } else if (result.timedOut) {
             return {
                 success: false,
                 output: '',
+                rawOutput: '',
                 error: `Command timed out after ${result.duration}ms`,
             };
         } else {
             return {
                 success: false,
                 output: result.stdout || '',
+                rawOutput: result.stdout || '',
                 error: result.stderr || `Command failed with exit code ${result.exitCode}`,
             };
         }
@@ -445,6 +527,7 @@ export async function executeToolCall(
         return {
             success: false,
             output: '',
+            rawOutput: '',
             error: error instanceof Error ? error.message : 'Unknown error',
         };
     }

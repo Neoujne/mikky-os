@@ -17,12 +17,24 @@ vi.mock('./docker.js', () => ({
 // Mock convex
 vi.mock('./convex.js', () => ({
     convex: {
-        query: vi.fn().mockResolvedValue('active')
+        query: vi.fn().mockResolvedValue('active'),
+        mutation: vi.fn().mockResolvedValue(null)
     }
+}));
+
+// Mock llm
+vi.mock('./llm.js', () => ({
+    chat: vi.fn().mockResolvedValue({
+        content: '# Mock Report',
+        finishReason: 'stop',
+        model: 'mock-model'
+    })
 }));
 
 import { executeToolCall } from './tools';
 import { workerManager } from './docker';
+import { convex } from './convex.js';
+import { chat } from './llm.js';
 
 describe('Tool Command Generation', () => {
     beforeEach(() => {
@@ -76,5 +88,39 @@ describe('Tool Command Generation', () => {
         expect(workerManager.runToolInSession).toHaveBeenCalledWith(expect.objectContaining({
             command: 'theHarvester -d example.com -b google'
         }));
+    });
+
+    it('should truncate output if it exceeds 2000 characters', async () => {
+        const largeOutput = 'A'.repeat(3000);
+        vi.mocked(workerManager.runToolInSession).mockResolvedValueOnce({
+            success: true,
+            stdout: largeOutput,
+            stderr: '',
+            exitCode: 0,
+            duration: 100
+        });
+
+        const result = await executeToolCall('nmap_scan', { target: 'example.com' }, 'session-123');
+        expect(result.output.length).toBeLessThan(3000);
+        expect(result.output).toContain('[Output truncated. Full logs saved to database]');
+        expect(result.output.length).toBeLessThanOrEqual(2000 + 100); // 2000 + truncation message
+    });
+
+    it('should generate a report using generate_final_report', async () => {
+        // Mock convex to return logs
+        vi.mocked(convex.query).mockResolvedValueOnce({
+            rawLogs: ['Log 1', 'Log 2']
+        });
+        vi.mocked(convex.mutation).mockResolvedValueOnce(null);
+
+        const result = await executeToolCall('generate_final_report', {}, 'cli-session-123');
+        
+        expect(convex.query).toHaveBeenCalledWith('agent:getRunStatus', expect.anything());
+        expect(chat).toHaveBeenCalled();
+        expect(convex.mutation).toHaveBeenCalledWith('agent:updateStatus', expect.objectContaining({
+            finalReport: '# Mock Report'
+        }));
+        expect(result.success).toBe(true);
+        expect(result.output).toContain('Final report generated');
     });
 });
