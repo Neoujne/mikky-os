@@ -34,7 +34,7 @@ This phase adds the "Gemini-style" interactivity and live log streaming.
 - [x] Task: Implement Inline Authorization Component [commit: 1a69769]
     - [ ] Sub-task: Write Tests: Test `<AuthPrompt>` renders Yes/No options and captures selection.
     - [ ] Sub-task: Implement: Create `<AuthPrompt>` using `ink-select-input`. Add locking state after selection.
-- [ ] Task: Connect CLI to Convex & Streaming Logs
+- [x] Task: Connect CLI to Convex & Streaming Logs [commit: 86620cf]
     - [ ] Sub-task: Write Tests: Mock Convex client to verify subscription to `scanLogs`.
     - [ ] Sub-task: Implement: Integrate Convex client in `mikky-cli`. Create `<LogStream>` component that collapses/expands based on status.
 - [ ] Task: Conductor - User Manual Verification 'Interactive Components & Streaming' (Protocol in workflow.md)
