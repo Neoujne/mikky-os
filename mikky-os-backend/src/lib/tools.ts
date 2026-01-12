@@ -415,9 +415,10 @@ export async function executeToolCall(
             }
 
             if (!rawLogsText || rawLogsText.length < 10) {
+                // LOGIC GATE: No evidence found. Abort report generation.
                 return {
                     success: false,
-                    output: 'Insufficient evidence to generate a report. Run some scans first!',
+                    output: 'ERROR: No evidence found (Tools did not run). Report generation aborted. You must run tools before reporting.',
                     rawOutput: '',
                     error: 'Empty log history'
                 };
