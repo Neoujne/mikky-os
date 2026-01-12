@@ -244,6 +244,22 @@ export class AgentClient {
     }
 
     /**
+     * Terminate the current agent session and kill the Docker container
+     */
+    async terminateSession(): Promise<void> {
+        try {
+            console.log(`\n${colors.warning('⚡')} Terminating session ${this.sessionId}...`);
+            await this.client.post('/api/session/terminate', {
+                sessionId: this.sessionId,
+            }, {
+                timeout: 2000, // Short timeout for termination
+            });
+        } catch (error) {
+            // Silently fail on termination error
+        }
+    }
+
+    /**
      * Utility delay function
      */
     private delay(ms: number): Promise<void> {

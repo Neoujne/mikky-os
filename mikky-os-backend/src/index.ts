@@ -184,6 +184,37 @@ app.get('/api/agent/status/:sessionId', async (req, res) => {
     }
 });
 
+/**
+ * Terminate an agent session and kill the associated Docker container
+ * Called by the CLI on Ctrl+C or graceful exit
+ */
+app.post('/api/session/terminate', async (req, res) => {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+        return res.status(400).json({ error: 'Missing sessionId' });
+    }
+
+    try {
+        console.log(`[SESSION] Received termination request for: ${sessionId}`);
+        
+        // Use WorkerManager to kill the container
+        const killed = await workerManager.killContainer(sessionId);
+        
+        res.json({ 
+            success: true, 
+            message: killed ? 'Session terminated and container killed' : 'Session not found or already terminated' 
+        });
+    } catch (error) {
+        console.error('[SESSION] Termination failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to terminate session',
+            details: error instanceof Error ? error.message : 'Unknown error',
+        });
+    }
+});
+
 // ============================================================================
 // TERMINAL EXEC ENDPOINT - Fire-and-Push Architecture
 // ============================================================================
