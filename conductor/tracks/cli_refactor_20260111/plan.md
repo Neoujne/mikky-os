@@ -20,7 +20,7 @@ This phase establishes the React Ink environment and basic UI shell.
 - [x] Task: Initialize React Ink Project [commit: 532f8ed]
     - [ ] Sub-task: Write Tests: Verify `mikky-cli` build script runs and outputs a valid JS file.
     - [ ] Sub-task: Implement: Refactor `mikky-cli` to use `ink`, `react`, `meow`. Create `src/ui.tsx` as entry point.
-- [ ] Task: Implement Persistent Input & Auto-Focus
+- [x] Task: Implement Persistent Input & Auto-Focus [commit: 6268f7d]
     - [ ] Sub-task: Write Tests: Test `<Input>` component renders and maintains focus.
     - [ ] Sub-task: Implement: Create `<ChatInput>` component with auto-focus and 5-line expansion logic.
 - [ ] Task: Implement Scrollable Chat History
