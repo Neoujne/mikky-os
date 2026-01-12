@@ -17,7 +17,7 @@ This phase focuses on fixing the "Muscle" (Docker) and preparing the "Brain" (Ba
 ## Phase 2: CLI Foundation & Ink Setup
 This phase establishes the React Ink environment and basic UI shell.
 
-- [ ] Task: Initialize React Ink Project
+- [x] Task: Initialize React Ink Project [commit: 532f8ed]
     - [ ] Sub-task: Write Tests: Verify `mikky-cli` build script runs and outputs a valid JS file.
     - [ ] Sub-task: Implement: Refactor `mikky-cli` to use `ink`, `react`, `meow`. Create `src/ui.tsx` as entry point.
 - [ ] Task: Implement Persistent Input & Auto-Focus
