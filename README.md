@@ -1,57 +1,100 @@
-# Mikky OS 🛡️ - The Autonomous Pentesting Agent
+# MIKKY OS 🛡️
+### AI-Powered Offensive Security Operations Center
 
-Mikky OS is an advanced, autonomous security agent designed for ethical hacking and extensive reconnaissance. It combines a ReAct-based agentic workflow with a secure Docker execution environment ("Docker Armory") and a slick, Gemini-style CLI.
+> **"The Matrix has you... unless you hack it first."** 🕶️
 
-## Features
+![Mikky OS Banner](https://img.shields.io/badge/Status-OPERATIONAL-cyan?style=for-the-badge&logo=security-network) ![Vibe](https://img.shields.io/badge/Vibe-CYBERPUNK-purple?style=for-the-badge&logo=ghost) ![AI](https://img.shields.io/badge/AI-DEEPSEEK_R1-red?style=for-the-badge&logo=openai)
 
-- **Agentic Workflow**: Recursive "Think → Act → Observe" loop that autonomously plans and executes security scans.
-- **Docker Armory**: Safe, ephemeral containers for running dangerous tools (Nmap, Nuclei, etc.) with `NET_RAW` capabilities.
-- **Gemini-Style CLI**: Interactive terminal interface with session persistence, history simulation, and slick UI animations.
-- **Memory Persistence**: Continues conversations across sessions (no more Amnesia).
-- **Interactive Prompts**: Smart Yes/No decision making for critical actions.
+---
 
-## Quick Start
+## ⚡ TL;DR (Quickstart)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Neoujne/mikky-os.git
-    cd mikky-os
-    ```
+For the elite operators who just want to run it:
 
-2.  **Configure Environment:**
-    Copy the example credentials and fill in your keys.
-    ```bash
-    cp .env.example .env
-    ```
-    *Required keys: `MIKKY_SECRET_KEY`, `OPENROUTER_API_KEY`, `CONVEX_URL`, `CLERK_*`*
-
-3.  **Install Dependencies:**
-    ```bash
-    npm install
-    # Install CLI globally (optional)
-    npm install -g ./mikky-cli
-    ```
-
-4.  **Build the Docker Armory:**
-    Build the Kali Linux worker image.
-    ```bash
-    docker build -t mikky-worker ./mikky-os-worker
-    ```
-
-5.  **Launch System:**
-    Start backend, frontend, and worker manager.
-    ```bash
-    npm run dev
-    ```
-
-## Usage
-
-In a separate terminal, run the CLI to interact with the agent:
 ```bash
-mikky
-# or
-npx tsx mikky-cli/src/index.ts
+# 1. Clone & Install
+git clone https://github.com/Neoujne/mikky-os.git
+cd mikky-os
+npm install
+
+# 2. Configure Environment (.env)
+# Required Keys: OPENROUTER_API_KEY, CONVEX_URL, CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+cp .env.example .env
+
+# 3. Launch System
+npm run dev:all
 ```
 
 ---
-*Disclaimer: For educational and authorized testing purposes only.*
+
+## 🌆 The Vibe
+
+Mikky OS isn't just a tool; it's an experience. Toggle between **Cyberpunk Mode** (Neon Cyan/Purple, Matrix rain aesthetics) and **Stealth Mode** (Green/Black terminal vibes) instantly. 
+
+Designed for the Vibeathon, it merges high-end UI engineering with ruthless backend efficiency.
+
+---
+
+## 🚀 Features (The "Meat")
+
+### 🕸️ Network Recon & Surveillance
+Active monitoring engine that orchestrates **Nmap**, **Masscan**, and **Subfinder** to map attack surfaces in real-time. Results are streamed live to your dashboard via WebSockets.
+
+### 🧪 Vulnerability Lab
+Integrated **Nuclei** engine capabilities. Detects CVEs, misconfigurations, and exposed panels. The system automatically categorizes findings by severity (CRITICAL to INFO).
+
+### 🤖 Source Code Audit [NEW]
+**AI-Driven SAST Engine**. Give it a GitHub URL, and Mikky OS will:
+1. Fetch the repository structure via GitHub API.
+2. Identify high-risk files (Auth, API, Crypto).
+3. "Read" the code using Large Language Models (LLMs).
+4. Produce a detailed vulnerability report with fixed code snippets.
+
+### 💬 AI Security Consultant [NEW]
+**Interactive Remediation Chat**. Found a vulnerability? Don't just stare at it. chat with the **AI Security Consultant** directly in the audit dashboard.
+- *"How do I fix this SQL Injection?"*
+- *"Explain why this regex is dangerous."*
+The AI analyzes the specific finding and provides tailored, copy-pasteable fixes.
+
+---
+
+## 🏗️ Architecture
+
+Event-Driven Architecture powered by **Inngest** for reliable orchestration.
+
+```mermaid
+graph TD
+    User[User UI] -->|Action| Convex[Convex DB]
+    Convex -->|Stream| User
+    Convex -->|Event| Inngest[Inngest Orchestrator]
+    
+    Inngest -->|Trigger| Agent1[Agent 1: Recon]
+    Inngest -->|Trigger| Agent4[Agent 4: Code Audit]
+    
+    subgraph Docker Armory
+    Agent1 -->|Run| Nmap[Nmap Container]
+    Agent1 -->|Run| Nuclei[Nuclei Container]
+    end
+    
+    subgraph AI Cloud
+    Agent4 -->|Analysis| LLM[OpenRouter / DeepSeek]
+    end
+    
+    Agent1 -->|Save| Convex
+    Agent4 -->|Save| Convex
+```
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React, Vite, TailwindCSS, Shadcn UI, Framer Motion
+- **Backend:** Node.js, Express, Inngest
+- **Database:** Convex (Real-time)
+- **Auth:** Clerk
+- **AI:** OpenRouter (DeepSeek, Gemini, Claude)
+- **Infrastructure:** Docker (Worker Nodes)
+
+---
+
+*Built for the Vibeathon. Hacking the planet, one repo at a time.* 💀

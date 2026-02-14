@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx tsx:*)",
+      "Bash(echo:*)",
+      "Bash(npm run agent:lock:*)",
+      "Bash(npm run agent:release:*)"
+    ]
+  }
+}

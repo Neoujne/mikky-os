@@ -1,19 +1,19 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Crosshair, Cpu, Database, ShieldAlert, Settings, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Crosshair, Cpu, Database, ShieldAlert, ShieldCheck, Settings, HelpCircle } from 'lucide-react';
 
 interface MainNavProps {
-    onNavigate?: () => void; // Optional callback for closing mobile menu
-    isCollapsed?: boolean; // Optional flag for collapsed sidebar
+    onNavigate?: () => void;
+    isCollapsed?: boolean;
 }
 
-// Navigation items configuration
 const navigationItems = [
     { label: 'Dashboard', href: '/', icon: LayoutDashboard },
     { label: 'Targets', href: '/targets', icon: Crosshair },
     { label: 'Operations', href: '/operations', icon: Cpu },
     { label: 'Intel', href: '/intel', icon: Database },
     { label: 'Vulns', href: '/vulns', icon: ShieldAlert },
+    { label: 'Code Audit', href: '/code-audit', icon: ShieldCheck },
     { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -33,22 +33,24 @@ export function MainNav({ onNavigate, isCollapsed = false }: MainNavProps) {
                         onClick={onNavigate}
                         title={isCollapsed ? item.label : undefined}
                         className={cn(
-                            'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 group relative overflow-hidden',
-                            isCollapsed && 'justify-center px-2',
+                            'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 group relative',
+                            isCollapsed ? 'justify-center px-2 rounded-xl' : 'overflow-hidden',
                             isActive
-                                ? 'text-cyan-400 bg-cyan-500/10'
+                                ? (isCollapsed
+                                    ? 'text-cyan-300 bg-cyan-500/15 ring-1 ring-cyan-500/40 shadow-[0_0_14px_rgba(6,182,212,0.18)]'
+                                    : 'text-cyan-400 bg-cyan-500/10')
                                 : 'text-zinc-400 hover:text-cyan-200 hover:bg-zinc-800/50'
                         )}
                     >
-                        {/* Active Indicator Bar */}
-                        {isActive && (
+                        {/* Active Indicator Bar - Only when expanded */}
+                        {isActive && !isCollapsed && (
                             <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
                         )}
 
                         {/* Icon */}
                         <span
                             className={cn(
-                                'transition-colors flex-shrink-0',
+                                'transition-colors flex-shrink-0 z-10',
                                 isActive ? 'text-cyan-400' : 'text-zinc-500 group-hover:text-cyan-300'
                             )}
                         >
@@ -57,7 +59,7 @@ export function MainNav({ onNavigate, isCollapsed = false }: MainNavProps) {
 
                         {/* Label - Hidden when collapsed */}
                         {!isCollapsed && (
-                            <span className="tracking-wide whitespace-nowrap overflow-hidden">{item.label}</span>
+                            <span className="tracking-wide whitespace-nowrap overflow-hidden z-10">{item.label}</span>
                         )}
                     </NavLink>
                 );

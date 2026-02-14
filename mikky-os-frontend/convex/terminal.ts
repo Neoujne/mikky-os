@@ -33,8 +33,8 @@ const COMMAND_BLOCKLIST = [
 // Maximum active sessions per user
 const MAX_SESSIONS_PER_USER = 5;
 
-// Backend URL - defaults to localhost:3000 for local development
-const BACKEND_URL = process.env.MIKKY_BACKEND_URL || 'http://localhost:3000';
+// Backend URL - defaults to localhost:5000 for local development
+const BACKEND_URL = (process.env.MIKKY_BACKEND_URL || "http://localhost:5000");
 
 /**
  * Get all active terminal sessions for the current user

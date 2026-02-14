@@ -8,7 +8,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 
 // Backend URL for health checks
-const BACKEND_URL = process.env.MIKKY_BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = (process.env.MIKKY_BACKEND_URL || "http://localhost:5000");
 
 /**
  * Get the current worker status

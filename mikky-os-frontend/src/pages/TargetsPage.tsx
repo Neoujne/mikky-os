@@ -1,6 +1,6 @@
 /**
- * Targets Page - Target Management
- * Manage pentest targets and scope definitions with Convex data.
+ * Targets Page - Target Management with Pagination
+ * Shows all targets with 20-per-page pagination.
  */
 
 import React from 'react';
@@ -9,14 +9,19 @@ import { api } from '../../convex/_generated/api';
 import { TargetsTable } from '@/components/command-center';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Target, Plus } from 'lucide-react';
+import { Target, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Target as TargetType } from '@/types/command-center';
 
 export function TargetsPage() {
     const [domain, setDomain] = React.useState('');
+    const [currentPage, setCurrentPage] = React.useState(0);
 
-    // Convex queries
-    const targets = useQuery(api.targets.list);
+    // Paginated query — 20 per page, succeeded only
+    const result = useQuery(api.targets.listPaginated, {
+        limit: 20,
+        cursor: currentPage.toString(),
+        succeededOnly: false,
+    });
 
     // Convex mutations
     const createMutation = useMutation(api.targets.create);
@@ -43,13 +48,11 @@ export function TargetsPage() {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleAddTarget();
-        }
+        if (e.key === 'Enter') handleAddTarget();
     };
 
     // Loading state
-    if (targets === undefined) {
+    if (result === undefined) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
@@ -61,10 +64,11 @@ export function TargetsPage() {
     }
 
     // Transform data
-    const transformedTargets: TargetType[] = targets.map((t) => ({
+    const transformedTargets: TargetType[] = result.targets.map((t) => ({
         _id: t._id,
         domain: t.domain,
         riskScore: t.riskScore,
+        safetyScore: t.safetyScore,
         totalVulns: t.totalVulns,
         lastScanDate: t.lastScanDate,
         status: t.status,
@@ -76,7 +80,9 @@ export function TargetsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-heading font-bold text-zinc-100 tracking-tight">Targets</h1>
-                    <p className="text-zinc-400 mt-1">Manage your pentest targets and scope definitions.</p>
+                    <p className="text-zinc-400 mt-1">
+                        {result.totalCount} managed target{result.totalCount !== 1 ? 's' : ''}.
+                    </p>
                 </div>
 
                 {/* Add Target Form */}
@@ -103,6 +109,38 @@ export function TargetsPage() {
             </div>
 
             <TargetsTable targets={transformedTargets} onDelete={handleDeleteTarget} />
+
+            {/* Pagination Controls */}
+            {result.totalPages > 1 && (
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/50">
+                    <p className="text-sm text-zinc-500 font-mono">
+                        Page {result.currentPage + 1} of {result.totalPages}
+                        <span className="text-zinc-700 ml-2">({result.totalCount} total)</span>
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage === 0}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            className="font-mono text-xs h-8 border-zinc-700 text-zinc-400 hover:text-zinc-200"
+                        >
+                            <ChevronLeft className="h-3 w-3 mr-1" />
+                            PREV
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!result.hasMore}
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            className="font-mono text-xs h-8 border-zinc-700 text-zinc-400 hover:text-zinc-200"
+                        >
+                            NEXT
+                            <ChevronRight className="h-3 w-3 ml-1" />
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

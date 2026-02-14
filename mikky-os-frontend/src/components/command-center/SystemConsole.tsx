@@ -78,17 +78,32 @@ const LogList = React.memo(function LogList({ logs }: { logs: ConsoleLog[] }) {
     );
 });
 
-export function SystemConsole() {
+interface SystemConsoleProps {
+    activeScans?: any[];
+}
+
+export function SystemConsole({ activeScans = [] }: SystemConsoleProps) {
     const consoleEndRef = useRef<HTMLDivElement>(null);
     const lastLogCountRef = useRef<number>(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const [consoleHeight, setConsoleHeight] = useState(300);
-    const [isMaximized, setIsMaximized] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
     const [tabs, setTabs] = useState<ConsoleTab[]>([
         { id: 'system', label: 'System', closeable: false }
     ]);
     const [activeTab, setActiveTab] = useState('system');
+    
+    // Clear logs when active scans change (new scan starts)
+    const lastScanCount = useRef(activeScans.length);
+    const [lastClearTime, setLastClearTime] = useState<number>(Date.now());
+    
+    useEffect(() => {
+        // Check if new scans have started (count increased)
+        if (activeScans.length > lastScanCount.current) {
+            // Update the last clear time to now to filter out old logs
+            setLastClearTime(Date.now());
+        }
+        lastScanCount.current = activeScans.length;
+    }, [activeScans]);
 
     // Clear logs on mount (component refresh)
     useEffect(() => {
@@ -103,7 +118,7 @@ export function SystemConsole() {
     const [debouncedLogs, setDebouncedLogs] = useState<ConsoleLog[]>([]);
     const debounceTimerRef = useRef<number | null>(null);
 
-    // Debounce log updates (100ms)
+    // Debounce log updates (100ms) and filter by last clear time
     useEffect(() => {
         if (!rawLogs) return;
 
@@ -114,7 +129,11 @@ export function SystemConsole() {
 
         // Schedule update
         debounceTimerRef.current = setTimeout(() => {
-            setDebouncedLogs(rawLogs);
+            // Filter logs to only show those after the last clear time
+            const filteredLogs = rawLogs.filter(log => 
+                new Date(log.timestamp).getTime() >= lastClearTime
+            );
+            setDebouncedLogs(filteredLogs);
         }, 100);
 
         // Cleanup
@@ -123,7 +142,7 @@ export function SystemConsole() {
                 clearTimeout(debounceTimerRef.current);
             }
         };
-    }, [rawLogs]);
+    }, [rawLogs, lastClearTime]);
 
     // Auto-scroll only when new logs arrive
     useEffect(() => {
@@ -164,11 +183,6 @@ export function SystemConsole() {
         };
     }, [isDragging]);
 
-    // Double-click to maximize
-    const handleDoubleClick = () => {
-        setIsMaximized(!isMaximized);
-    };
-
     // Close tab
     const handleCloseTab = (tabId: string) => {
         const newTabs = tabs.filter(t => t.id !== tabId);
@@ -178,18 +192,16 @@ export function SystemConsole() {
         }
     };
 
-    // TODO: Auto-create tabs when scans start (will be wired to activeScans)
-    // For now, this is just the structure
-
     // Memoize log count display
     const logCount = useMemo(() => debouncedLogs.length, [debouncedLogs.length]);
 
-    const height = isMaximized ? `calc(100vh - 40px)` : `${consoleHeight}px`;
+    // Fixed height since maximize is disabled
+    const height = `${consoleHeight}px`;
 
     return (
         <div
             ref={containerRef}
-            className="h-full flex flex-col bg-zinc-950 rounded-lg border border-zinc-800 overflow-hidden"
+            className="h-full flex flex-col bg-zinc-950 rounded-lg border border-zinc-800 overflow-hidden mt-4" // Added mt-4 for spacing
             style={{ height }}
         >
             {/* Draggable Resize Handle */}
@@ -200,7 +212,6 @@ export function SystemConsole() {
                     isDragging ? "bg-cyan-500" : "bg-transparent hover:bg-cyan-500/30"
                 )}
                 onMouseDown={handleMouseDown}
-                onDoubleClick={handleDoubleClick}
             >
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="h-0.5 w-16 bg-cyan-500/50 rounded-full" />
@@ -248,19 +259,7 @@ export function SystemConsole() {
                         >
                             CLEAR
                         </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-zinc-500 hover:text-cyan-400"
-                            onClick={() => setIsMaximized(!isMaximized)}
-                            title={isMaximized ? "Restore" : "Maximize"}
-                        >
-                            {isMaximized ? (
-                                <Minimize2 className="h-3.5 w-3.5" />
-                            ) : (
-                                <Maximize2 className="h-3.5 w-3.5" />
-                            )}
-                        </Button>
+                        {/* Removed maximize button as per requirements */}
                     </div>
                 </div>
 

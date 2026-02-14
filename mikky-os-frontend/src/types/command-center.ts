@@ -34,7 +34,7 @@ export interface ActiveScan {
     currentStage: keyof StageStatus;
     progress: number; // 0-100
     stageStatus: StageStatus;
-    status: 'queued' | 'scanning' | 'completed' | 'failed' | 'cancelled';
+    status: 'queued' | 'scanning' | 'completed' | 'failed' | 'cancelled' | 'stopped';
     // Summary metrics (populated during scan)
     totalPorts?: number;
     hostCount?: number;

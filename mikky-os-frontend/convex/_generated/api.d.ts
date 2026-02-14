@@ -9,13 +9,18 @@
  */
 
 import type * as agent from "../agent.js";
+import type * as codeAudits from "../codeAudits.js";
 import type * as crons from "../crons.js";
+import type * as intel from "../intel.js";
 import type * as scanLogs from "../scanLogs.js";
 import type * as scans from "../scans.js";
+import type * as settings from "../settings.js";
 import type * as status from "../status.js";
 import type * as system from "../system.js";
 import type * as targets from "../targets.js";
 import type * as terminal from "../terminal.js";
+import type * as users from "../users.js";
+import type * as vulnerabilities from "../vulnerabilities.js";
 
 import type {
   ApiFromModules,
@@ -25,13 +30,18 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   agent: typeof agent;
+  codeAudits: typeof codeAudits;
   crons: typeof crons;
+  intel: typeof intel;
   scanLogs: typeof scanLogs;
   scans: typeof scans;
+  settings: typeof settings;
   status: typeof status;
   system: typeof system;
   targets: typeof targets;
   terminal: typeof terminal;
+  users: typeof users;
+  vulnerabilities: typeof vulnerabilities;
 }>;
 
 /**

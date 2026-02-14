@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, Clock, Shield, Wifi, AlertTriangle, FileText } from 'lucide-react';
 import type { StageStatus, LiveOperationsProps, ActiveScan } from '@/types/command-center';
 import { MissionReport } from './MissionReport';
+import { DownloadReportButton } from '@/components/reports/DownloadReportButton';
+import { renderSafetyScore } from '@/lib/safetyScore';
 
 const STAGES: Array<keyof StageStatus> = [
     'info_gathering',
@@ -62,12 +64,9 @@ function StageIndicator({ status, label, isLast }: { status: string; label: stri
     );
 }
 
-// Helper to format safety score color: 0-49 Critical, 50-79 Warning, 80-100 Safe
-function getSafetyColor(score?: number): string {
-    if (score === undefined) return 'text-zinc-500';
-    if (score >= 80) return 'text-emerald-400';
-    if (score >= 50) return 'text-amber-400';
-    return 'text-rose-400';
+// Safety Score — use shared helper
+function getSafetyDisplay(scan: ActiveScan) {
+    return renderSafetyScore(scan.status, scan.safetyScore);
 }
 
 // Report trigger with local modal state
@@ -91,7 +90,7 @@ function ReportTrigger({ scan }: { scan: ActiveScan }) {
                 open={isOpen}
                 onOpenChange={setIsOpen}
                 summary={scan.aiSummary}
-                safetyScore={scan.safetyScore ?? 100}
+                safetyScore={scan.safetyScore}
                 targetDomain={scan.targetDomain}
                 isComplete={true}
             />
@@ -141,9 +140,12 @@ export function LiveOperations({ activeScans, onSelectScan }: LiveOperationsProp
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    {/* VIEW REPORT button - only show when completed with aiSummary */}
-                                    {scan.status === 'completed' && scan.aiSummary && (
-                                        <ReportTrigger scan={scan} />
+                                    {/* Action buttons for completed scans */}
+                                    {scan.status === 'completed' && (
+                                        <>
+                                            {scan.aiSummary && <ReportTrigger scan={scan} />}
+                                            <DownloadReportButton scanId={scan._id} />
+                                        </>
                                     )}
                                     <div
                                         className="flex items-center gap-2 text-cyan-400 text-xs font-bold font-mono cursor-pointer"
@@ -182,13 +184,18 @@ export function LiveOperations({ activeScans, onSelectScan }: LiveOperationsProp
                                 </div>
 
                                 {/* Safety Score */}
-                                <div className="flex items-center gap-1.5 text-xs font-mono">
-                                    <Shield className={cn("h-3.5 w-3.5", getSafetyColor(scan.safetyScore))} />
-                                    <span className="text-zinc-400">SAFETY:</span>
-                                    <span className={cn("font-bold", getSafetyColor(scan.safetyScore))}>
-                                        {scan.safetyScore !== undefined ? scan.safetyScore : 'CALC...'}
-                                    </span>
-                                </div>
+                                {(() => {
+                                    const safety = getSafetyDisplay(scan);
+                                    return (
+                                        <div className="flex items-center gap-1.5 text-xs font-mono">
+                                            <Shield className={cn("h-3.5 w-3.5", safety.className)} />
+                                            <span className="text-zinc-400">SAFETY:</span>
+                                            <span className={cn("font-bold", safety.className)}>
+                                                {safety.text}
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             {/* 9-Stage Progress Indicators */}

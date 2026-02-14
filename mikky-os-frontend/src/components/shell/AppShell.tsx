@@ -12,12 +12,14 @@ interface AppShellProps {
     children: React.ReactNode;
     onLogout?: () => void;
     onEngage?: () => void;
+    activeScans?: any[];
 }
 
 export function AppShell({
     children,
     onLogout,
     onEngage,
+    activeScans = [],
 }: AppShellProps) {
     const [isConsoleOpen, setIsConsoleOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -50,7 +52,14 @@ export function AppShell({
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-cyan-500/30">
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-50">
-                <div className="font-heading font-bold text-xl tracking-tighter text-cyan-400">MIKKY OS</div>
+                <div className="inline-flex items-center gap-2.5 font-heading font-bold text-xl tracking-tighter text-cyan-400">
+                    <img
+                        src="/mikky-os-logo.png"
+                        alt="Mikky OS"
+                        className="h-7 w-7 rounded-sm object-contain"
+                    />
+                    <span>MIKKY OS</span>
+                </div>
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-cyan-400">
@@ -60,8 +69,13 @@ export function AppShell({
                     <SheetContent side="left" className="w-[80%] bg-zinc-950 border-r-zinc-800 p-0 text-zinc-100">
                         <div className="h-full flex flex-col">
                             <div className="p-6">
-                                <div className="font-heading font-bold text-2xl tracking-tighter text-cyan-400 mb-8">
-                                    MIKKY OS
+                                <div className="inline-flex items-center gap-2.5 font-heading font-bold text-2xl tracking-tighter text-cyan-400 mb-8">
+                                    <img
+                                        src="/mikky-os-logo.png"
+                                        alt="Mikky OS"
+                                        className="h-8 w-8 rounded-sm object-contain"
+                                    />
+                                    <span>MIKKY OS</span>
                                 </div>
                                 <Button
                                     className="w-full bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold mb-6 shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all"
@@ -88,12 +102,30 @@ export function AppShell({
                     "hidden lg:flex flex-col border-r border-zinc-800/50 bg-zinc-950/90 backdrop-blur-sm fixed inset-y-0 left-0 z-40 transition-all duration-300",
                     isCollapsed ? "w-16" : "w-64"
                 )}>
-                    <div className="p-6 flex-1 flex flex-col overflow-hidden">
+                    <div className={cn(
+                        "flex-1 flex flex-col overflow-hidden",
+                        isCollapsed ? "p-2" : "p-6"
+                    )}>
                         <div className={cn(
-                            "font-heading font-bold tracking-tighter text-cyan-400 mb-8 overflow-hidden whitespace-nowrap",
-                            isCollapsed ? "text-lg text-center" : "text-2xl"
+                            "font-heading font-bold tracking-tighter text-cyan-400 mb-8 overflow-hidden",
+                            isCollapsed ? "text-lg flex justify-center mt-1" : "text-2xl"
                         )}>
-                            {isCollapsed ? 'M' : 'MIKKY OS'}
+                            {isCollapsed ? (
+                                <img
+                                    src="/mikky-os-logo.png"
+                                    alt="Mikky OS"
+                                    className="h-9 w-9 rounded-sm object-contain"
+                                />
+                            ) : (
+                                <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
+                                    <img
+                                        src="/mikky-os-logo.png"
+                                        alt="Mikky OS"
+                                        className="h-9 w-9 rounded-sm object-contain"
+                                    />
+                                    <span>MIKKY OS</span>
+                                </div>
+                            )}
                         </div>
                         <MainNav isCollapsed={isCollapsed} />
                     </div>

@@ -164,74 +164,107 @@ export async function chatWithTools(options: ToolCallOptions): Promise<ChatRespo
         throw new Error('OPENROUTER_API_KEY is not set');
     }
 
-    try {
-        const response = await openai.chat.completions.create({
-            model,
-            messages: messages as ChatCompletionMessageParam[],
-            tools,
-            tool_choice: toolChoice,
-            temperature,
-            max_tokens: maxTokens,
-        });
+    const MAX_RETRIES = 3;
+    let lastError: any = null;
 
-        const choice = response.choices[0];
-        // Handle tool calls - filter for function type and map
-        const toolCalls = choice.message.tool_calls
-            ?.filter((tc): tc is { id: string; type: 'function'; function: { name: string; arguments: string } } =>
-                tc.type === 'function' && 'function' in tc
-            )
-            .map(tc => ({
-                id: tc.id,
-                type: 'function' as const,
-                function: {
-                    name: tc.function.name,
-                    arguments: tc.function.arguments,
-                },
-            })) || null;
-
-        return {
-            content: choice.message.content,
-            toolCalls,
-            finishReason: choice.finish_reason || 'stop',
-            model: response.model,
-            usage: response.usage ? {
-                promptTokens: response.usage.prompt_tokens,
-                completionTokens: response.usage.completion_tokens,
-                totalTokens: response.usage.total_tokens,
-            } : undefined,
-        };
-    } catch (error: any) {
-        console.error('[LLM] Tool chat error:', error);
-
-        // Detailed error logging for debugging provider issues
-        if (error.response) {
-            console.error('[LLM] Provider error details:', JSON.stringify(error.response.data, null, 2));
-        }
-
-        // FALLBACK LOGIC: If tool calling fails (400 Bad Request), retry without tools
-        // This often happens if the provider doesn't support the specific tool schema or model doesn't support tools
-        if (error.status === 400 || (error.message && error.message.includes('400'))) {
-            console.warn('[LLM] Falling back to text-only mode due to provider error...');
-
-            // Add a system instruction to guide the text-only response
-            const fallbackMessages = [
-                ...messages,
-                {
-                    role: 'system' as const,
-                    content: 'SYSTEM NOTICE: Tool execution is currently unavailable. Please just expect that you cannot run tools right now. Suggest the commands the user should run manually instead.'
-                }
-            ];
-
-            return chat({
-                messages: fallbackMessages,
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const response = await openai.chat.completions.create({
                 model,
-                temperature: 0.7,
-                maxTokens,
+                messages: messages as ChatCompletionMessageParam[],
+                tools,
+                tool_choice: toolChoice,
+                temperature,
+                max_tokens: maxTokens,
             });
-        }
 
-        throw error;
+            const choice = response.choices[0];
+            // Handle tool calls - filter for function type and map
+            const toolCalls = choice.message.tool_calls
+                ?.filter((tc): tc is { id: string; type: 'function'; function: { name: string; arguments: string } } =>
+                    tc.type === 'function' && 'function' in tc
+                )
+                .map(tc => ({
+                    id: tc.id,
+                    type: 'function' as const,
+                    function: {
+                        name: tc.function.name,
+                        arguments: tc.function.arguments,
+                    },
+                })) || null;
+
+            return {
+                content: choice.message.content,
+                toolCalls,
+                finishReason: choice.finish_reason || 'stop',
+                model: response.model,
+                usage: response.usage ? {
+                    promptTokens: response.usage.prompt_tokens,
+                    completionTokens: response.usage.completion_tokens,
+                    totalTokens: response.usage.total_tokens,
+                } : undefined,
+            };
+        } catch (error: any) {
+            lastError = error;
+            console.error(`[LLM] Tool chat error (attempt ${attempt}/${MAX_RETRIES}):`, error.message);
+
+            // Check for network errors (ECONNRESET, terminated, etc.)
+            const isNetworkError =
+                error.code === 'ECONNRESET' ||
+                error.message?.includes('terminated') ||
+                error.message?.includes('ECONNRESET') ||
+                error.message?.includes('socket hang up');
+
+            if (isNetworkError && attempt < MAX_RETRIES) {
+                // Exponential backoff: 1s, 2s, 4s
+                const backoffMs = Math.pow(2, attempt - 1) * 1000;
+                console.warn(`[LLM] Network error detected. Retrying in ${backoffMs}ms...`);
+                await new Promise(resolve => setTimeout(resolve, backoffMs));
+                continue;
+            }
+
+            // Detailed error logging for debugging provider issues
+            if (error.response) {
+                console.error('[LLM] Provider error details:', JSON.stringify(error.response.data, null, 2));
+            }
+
+            // FALLBACK LOGIC: If tool calling fails (400 Bad Request), retry without tools
+            // This often happens if the provider doesn't support the specific tool schema or model doesn't support tools
+            if (error.status === 400 || (error.message && error.message.includes('400'))) {
+                console.warn('[LLM] Falling back to text-only mode due to provider error...');
+
+                // Add a system instruction to guide the text-only response
+                const fallbackMessages = [
+                    ...messages,
+                    {
+                        role: 'system' as const,
+                        content: 'SYSTEM NOTICE: Tool execution is currently unavailable. Please just expect that you cannot run tools right now. Suggest the commands the user should run manually instead.'
+                    }
+                ];
+
+                return chat({
+                    messages: fallbackMessages,
+                    model,
+                    temperature: 0.7,
+                    maxTokens,
+                });
+            }
+
+            // If not a network error or all retries exhausted for network errors, throw
+            if (!isNetworkError) {
+                throw error;
+            }
+        }
     }
+
+    // All retries exhausted - return graceful failure instead of crashing
+    console.error('[LLM] All retry attempts exhausted. Returning graceful failure.');
+    return {
+        content: '⚠️ AI Connection Lost. The network connection to the AI provider failed after multiple retries. Please try again in a moment.',
+        toolCalls: null,
+        finishReason: 'error',
+        model: model,
+    };
 }
 
 /**
@@ -253,13 +286,13 @@ export function getCurrentModel(): string {
  */
 export async function summarizeContext(messages: ChatMessage[]): Promise<string> {
     if (!OPENROUTER_API_KEY) {
-         throw new Error('OPENROUTER_API_KEY is not set');
+        throw new Error('OPENROUTER_API_KEY is not set');
     }
 
     try {
         // Filter out system messages to avoid confusing the summarizer
         const conversationHistory = messages.filter(m => m.role !== 'system');
-        
+
         const response = await chat({
             messages: [
                 {

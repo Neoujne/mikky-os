@@ -62,9 +62,14 @@ export function Navbar() {
                     {/* Logo */}
                     <Link
                         to="/"
-                        className="font-heading font-bold text-2xl tracking-tighter text-cyan-400 hover:text-cyan-300 transition-colors"
+                        className="inline-flex items-center gap-2.5 font-heading font-bold text-2xl tracking-tighter text-cyan-400 hover:text-cyan-300 transition-colors"
                     >
-                        MIKKY OS
+                        <img
+                            src="/mikky-os-logo.png"
+                            alt="Mikky OS"
+                            className="h-8 w-8 rounded-sm object-contain"
+                        />
+                        <span>MIKKY OS</span>
                     </Link>
 
                     {/* Desktop Navigation */}

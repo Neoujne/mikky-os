@@ -4,7 +4,7 @@
  */
 
 import { SignUpButton } from '@clerk/clerk-react';
-import { Brain, Container, Activity, Check, ArrowRight } from 'lucide-react';
+import { Brain, Container, Activity, Check, ArrowRight, FileCode2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout';
 import { Link } from 'react-router-dom';
@@ -122,6 +122,31 @@ export function LandingPage() {
                             </h3>
                             <p className="text-zinc-400 leading-relaxed">
                                 Live console streaming, real-time progress tracking, and instant vulnerability notifications. Watch your scans execute in a slick terminal interface.
+                            </p>
+                        </div>
+                        {/* Feature 4 - New */}
+                        <div className="group p-8 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-blue-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                            <div className="h-14 w-14 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <FileCode2 className="h-7 w-7 text-zinc-950" />
+                            </div>
+                            <h3 className="text-2xl font-heading font-bold mb-3 text-zinc-100">
+                                🤖 Source Code Analysis
+                            </h3>
+                            <p className="text-zinc-400 leading-relaxed">
+                                Automated SAST engine that pulls GitHub repos, parses file trees, and uses LLMs to identify high-risk vulnerabilities in logic, auth, and config.
+                            </p>
+                        </div>
+
+                        {/* Feature 5 - New */}
+                        <div className="group p-8 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                            <div className="h-14 w-14 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <MessageSquare className="h-7 w-7 text-zinc-950" />
+                            </div>
+                            <h3 className="text-2xl font-heading font-bold mb-3 text-zinc-100">
+                                💬 AI Remediation Chat
+                            </h3>
+                            <p className="text-zinc-400 leading-relaxed">
+                                Don't just find bugs—fix them. Chat directly with the AI Security Consultant to get tailored remediation steps and code patches for every finding.
                             </p>
                         </div>
                     </div>

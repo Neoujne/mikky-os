@@ -1,73 +1,20 @@
-# React + TypeScript + Vite
+# Mikky OS Frontend 💻
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Built with **React, Vite, TailwindCSS, and Shadcn UI**. The Cyberpunk interface for the modern hacker.
 
-Currently, two official plugins are available:
+## 🔐 Auth & Identity (Clerk)
+We use [Clerk](https://clerk.com/) for secure authentication. User sessions are persisted and synced with our backend for role-based access control.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🗄️ Real-time Database (Convex)
+Data isn't fetched; it's **streamed**. Convex ensures that scan updates, agent chat logs, and vulnerability findings appear instantly on your dashboard without refreshing.
 
-## React Compiler
+## 🎨 Theme Provider
+The `ThemeProvider` allows hot-swapping between:
+- **Cyberpunk Mode**: High-contrast Neon Cyan/Purple.
+- **Stealth Mode**: Classic Terminal Green.
+- **Vibe Mode**: The Vibeathon special.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🚀 Key Pages
+- **Code Audit**: Input a repo URL, watch the terminal stream, and chat with findings.
+- **Intel**: Network recon visualization.
+- **Vulns**: Aggregated vulnerability database.

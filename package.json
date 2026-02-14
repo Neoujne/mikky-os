@@ -1,0 +1,23 @@
+{
+    "name": "mikky-os",
+    "version": "1.0.0",
+    "private": true,
+    "description": "MIKKY OS - AI-Powered Penetration Testing Platform",
+    "scripts": {
+        "dev:all": "concurrently -n \"CONVEX,FRONTEND,BACKEND,INNGEST\" -c \"cyan,green,yellow,magenta\" \"npm run dev:convex\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:inngest\"",
+        "dev:convex": "cd mikky-os-frontend && npx convex dev",
+        "dev:frontend": "cd mikky-os-frontend && npm run dev",
+        "dev:backend": "cd mikky-os-backend && npm run dev",
+        "dev:inngest": "cd mikky-os-backend && inngest-cli dev",
+        "agent:check": "tsx scripts/agent-sync.ts check",
+        "agent:lock": "tsx scripts/agent-sync.ts lock",
+        "agent:release": "tsx scripts/agent-sync.ts release",
+        "agent:list": "tsx scripts/agent-sync.ts list"
+    },
+    "devDependencies": {
+        "@types/node": "^25.2.3",
+        "concurrently": "^9.1.0",
+        "inngest-cli": "^1.8.0",
+        "tsx": "^4.19.0"
+    }
+}

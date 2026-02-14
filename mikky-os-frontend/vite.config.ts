@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true, // Listen on all IPs
-    port: 3001, // <--- CHANGED FROM 5174 TO 3001
+    port: 5173, // Using Vite's default port (3001 was in Windows reserved range)
   },
   resolve: {
     alias: {

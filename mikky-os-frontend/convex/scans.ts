@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { Doc } from "./_generated/dataModel";
 
 // Valid status values matching the schema
-const VALID_STATUSES = ["queued", "scanning", "completed", "failed", "cancelled"] as const;
+const VALID_STATUSES = ["queued", "scanning", "completed", "failed", "cancelled", "stopped"] as const;
 type ScanStatus = Doc<"scanRuns">["status"];
 
 // Type guard to validate status
@@ -19,6 +19,16 @@ export const getStatus = query({
     handler: async (ctx, args) => {
         const scan = await ctx.db.get(args.id);
         return scan?.status ?? null;
+    },
+});
+
+// Get full scan document by ID (Used by Backend for PDF reports)
+export const getById = query({
+    args: {
+        id: v.id("scanRuns"),
+    },
+    handler: async (ctx, args) => {
+        return await ctx.db.get(args.id);
     },
 });
 
@@ -128,6 +138,8 @@ export const updateStatus = mutation({
         // AI-generated reports
         aiSummary: v.optional(v.string()),
         remediationPrompt: v.optional(v.string()),
+        // Completion timestamp
+        completedAt: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const { id, status, ...otherUpdates } = args;
@@ -185,6 +197,9 @@ export const updateStatus = mutation({
         }
         if (otherUpdates.remediationPrompt !== undefined) {
             updates.remediationPrompt = otherUpdates.remediationPrompt;
+        }
+        if (otherUpdates.completedAt !== undefined) {
+            updates.completedAt = otherUpdates.completedAt;
         }
 
         // Validate and cast status with explicit error
@@ -271,3 +286,60 @@ export const engageBatch = mutation({
     },
 });
 
+// ============================================================================
+// DASHBOARD QUERIES
+// ============================================================================
+
+// List live operations (queued + scanning) — for Dashboard Live Ops section
+export const listLiveOperations = query({
+    handler: async (ctx) => {
+        const scanning = await ctx.db
+            .query('scanRuns')
+            .withIndex('by_status', (q) => q.eq('status', 'scanning'))
+            .order('desc')
+            .collect();
+        const queued = await ctx.db
+            .query('scanRuns')
+            .withIndex('by_status', (q) => q.eq('status', 'queued'))
+            .order('desc')
+            .collect();
+        return [...scanning, ...queued];
+    },
+});
+
+// List failed scans — for Dashboard Failed Targets section
+export const listFailed = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query('scanRuns')
+            .withIndex('by_status', (q) => q.eq('status', 'failed'))
+            .order('desc')
+            .take(args.limit ?? 20);
+    },
+});
+
+// List completed scans — for Dashboard Managed Targets section
+export const listCompleted = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query('scanRuns')
+            .withIndex('by_status', (q) => q.eq('status', 'completed'))
+            .order('desc')
+            .take(args.limit ?? 10);
+    },
+});
+
+// List recent scans (last 30 minutes) — for Terminal dynamic tabs
+export const listRecent = query({
+    args: {},
+    handler: async (ctx) => {
+        const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        const scans = await ctx.db
+            .query('scanRuns')
+            .order('desc')
+            .take(20);
+        return scans.filter(s => s.startedAt >= thirtyMinAgo);
+    },
+});

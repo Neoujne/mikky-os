@@ -14,7 +14,7 @@ import { Shield, Copy, Check } from 'lucide-react';
 
 interface MissionReportProps {
     summary: string;
-    safetyScore: number; // 0-100 where 100 = Safe, 0 = Critical
+    safetyScore?: number; // Backend-provided 0-100 where 100 = Safe
     targetDomain: string;
     remediationPrompt?: string; // Optional explicit remediation prompt
     isComplete?: boolean;
@@ -22,10 +22,10 @@ interface MissionReportProps {
     onOpenChange: (open: boolean) => void;
 }
 
-// Safety level indicator: 0-49 Critical, 50-79 Warning, 80-100 Safe
+// Safety level indicator: <70 Critical, 70-89 Medium Risk, 90-100 Secure
 function getSafetyLevel(score: number): { level: string; emoji: string; color: string } {
-    if (score >= 80) return { level: 'SAFE', emoji: '🟢', color: 'text-emerald-500' };
-    if (score >= 50) return { level: 'WARNING', emoji: '🟡', color: 'text-amber-500' };
+    if (score >= 90) return { level: 'SECURE', emoji: '🟢', color: 'text-emerald-500' };
+    if (score >= 70) return { level: 'MEDIUM RISK', emoji: '🟡', color: 'text-amber-500' };
     return { level: 'CRITICAL', emoji: '🔴', color: 'text-rose-500' };
 }
 
@@ -105,7 +105,13 @@ const markdownComponents = {
 };
 
 export function MissionReport({ summary, safetyScore, targetDomain, remediationPrompt, isComplete = true, open, onOpenChange }: MissionReportProps) {
-    const safety = getSafetyLevel(safetyScore);
+    const hasSafetyScore = typeof safetyScore === 'number';
+    const normalizedSafetyScore = hasSafetyScore
+        ? Math.max(0, Math.min(100, Math.round(safetyScore)))
+        : undefined;
+    const safety = normalizedSafetyScore !== undefined
+        ? getSafetyLevel(normalizedSafetyScore)
+        : undefined;
     const [copied, setCopied] = useState(false);
 
     if (!isComplete || !summary) {
@@ -135,7 +141,7 @@ export function MissionReport({ summary, safetyScore, targetDomain, remediationP
                 <div className="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800 px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <Shield className={cn("h-6 w-6", safety.color)} />
+                            <Shield className={cn("h-6 w-6", safety?.color ?? "text-zinc-500")} />
                             <div>
                                 <h2 className="text-lg font-bold font-heading text-zinc-100 tracking-tight">
                                     MISSION DEBRIEF
@@ -146,11 +152,12 @@ export function MissionReport({ summary, safetyScore, targetDomain, remediationP
                         <div className={cn(
                             "flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-sm font-bold",
                             "bg-zinc-900 border",
-                            safetyScore >= 80 ? "border-emerald-500/30 text-emerald-400" :
-                                safetyScore >= 50 ? "border-amber-500/30 text-amber-400" :
-                                    "border-rose-500/30 text-rose-400"
+                            normalizedSafetyScore === undefined ? "border-zinc-700 text-zinc-400" :
+                                normalizedSafetyScore >= 90 ? "border-emerald-500/30 text-emerald-400" :
+                                    normalizedSafetyScore >= 70 ? "border-amber-500/30 text-amber-400" :
+                                        "border-rose-500/30 text-rose-400"
                         )}>
-                            {safety.emoji} SAFETY: {safetyScore}
+                            {normalizedSafetyScore !== undefined ? `${safety?.emoji} ${safety?.level}: ${normalizedSafetyScore}` : "SAFETY: --"}
                         </div>
                     </div>
                 </div>

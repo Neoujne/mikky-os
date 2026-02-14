@@ -11,6 +11,10 @@ npm-debug.log
 .convex/
 .DS_Store
 
+# Agent lock coordination
+.agent-locks.json
+.agent-locks.json.write-lock
+
 # Internal Documentation (DO NOT PUSH)
 product-plan/
 conductor/

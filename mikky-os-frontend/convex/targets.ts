@@ -90,6 +90,7 @@ export const updateStats = mutation({
         riskScore: v.optional(v.number()), // Deprecated
         totalVulns: v.number(),
         lastScanDate: v.string(),
+        lastScanStatus: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const target = await ctx.db.get(args.id);
@@ -109,6 +110,9 @@ export const updateStats = mutation({
         }
         if (args.riskScore !== undefined) {
             updates.riskScore = args.riskScore;
+        }
+        if (args.lastScanStatus !== undefined) {
+            updates.lastScanStatus = args.lastScanStatus;
         }
 
         await ctx.db.patch(args.id, updates);
@@ -142,6 +146,7 @@ export const engage = mutation({
                 status: 'active',
                 lastScanDate: now,
                 isArchived: false, // Unarchive on re-engage
+                lastScanStatus: 'scanning',
             });
         } else {
             // Create new target
@@ -153,6 +158,7 @@ export const engage = mutation({
                 createdAt: now,
                 lastScanDate: now,
                 isArchived: false,
+                lastScanStatus: 'scanning',
             });
             target = await ctx.db.get(targetId);
         }
@@ -196,3 +202,71 @@ export const engage = mutation({
         return { targetId: target._id, scanRunId };
     },
 });
+
+// ============================================================================
+// DASHBOARD QUERIES
+// ============================================================================
+
+// List targets with successful scans (for Managed Targets section)
+export const listSucceeded = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 10;
+        const allTargets = await ctx.db.query('targets').order('desc').collect();
+        const succeededTargets = allTargets.filter(t =>
+            !t.isArchived && t.lastScanStatus === 'completed'
+        );
+        return succeededTargets.slice(0, limit);
+    },
+});
+
+// Paginated target list (for /targets page)
+export const listPaginated = query({
+    args: {
+        limit: v.optional(v.number()),
+        cursor: v.optional(v.string()),
+        succeededOnly: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 20;
+        const allTargets = await ctx.db.query('targets').order('desc').collect();
+
+        // Filter
+        let filtered = allTargets.filter(t => !t.isArchived);
+        if (args.succeededOnly) {
+            filtered = filtered.filter(t => t.lastScanStatus === 'completed');
+        }
+
+        // Sort by lastScanDate descending. Targets without a valid scan date go to the bottom.
+        filtered.sort((a, b) => {
+            const aTime = a.lastScanDate ? Date.parse(a.lastScanDate) : Number.NaN;
+            const bTime = b.lastScanDate ? Date.parse(b.lastScanDate) : Number.NaN;
+            const aValid = Number.isFinite(aTime);
+            const bValid = Number.isFinite(bTime);
+
+            if (aValid && bValid) return bTime - aTime;
+            if (aValid) return -1;
+            if (bValid) return 1;
+
+            // Stable fallback for targets with no scan date.
+            const aCreated = a.createdAt ? Date.parse(a.createdAt) : 0;
+            const bCreated = b.createdAt ? Date.parse(b.createdAt) : 0;
+            return bCreated - aCreated;
+        });
+
+        // Offset-based pagination
+        const parsedPage = args.cursor ? parseInt(args.cursor, 10) : 0;
+        const page = Number.isNaN(parsedPage) ? 0 : Math.max(parsedPage, 0);
+        const offset = page * limit;
+        const pageTargets = filtered.slice(offset, offset + limit);
+
+        return {
+            targets: pageTargets,
+            totalCount: filtered.length,
+            totalPages: Math.ceil(filtered.length / limit),
+            currentPage: page,
+            hasMore: offset + limit < filtered.length,
+        };
+    },
+});
+

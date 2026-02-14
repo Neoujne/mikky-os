@@ -269,6 +269,52 @@ export class WorkerManager {
     }
 
     /**
+     * Verify a session container is alive by running a test exec.
+     * If the container is gone (404) or stopped, clears the stale reference
+     * and spins up a fresh container.
+     * Returns true if a healthy session is available after the call.
+     */
+    public async ensureSessionAlive(scanRunId: string): Promise<boolean> {
+        const container = this.scanSessions.get(scanRunId);
+
+        if (!container) {
+            // No in-memory reference at all — just start fresh
+            console.log(`[SESSION] No session reference for ${scanRunId}, starting fresh`);
+            return this.startSession(scanRunId);
+        }
+
+        // Verify the container is actually running by attempting a lightweight exec
+        try {
+            const exec = await container.exec({
+                Cmd: ['true'],
+                AttachStdout: false,
+                AttachStderr: false,
+            });
+            await exec.start({ Detach: true, Tty: false });
+            console.log(`[SESSION] Container verified alive for ${scanRunId}`);
+            return true;
+        } catch (error: any) {
+            const code = error.statusCode || error.status;
+            console.warn(`[SESSION] Container health check failed (HTTP ${code}): ${error.message}`);
+
+            // Clear the stale reference
+            this.scanSessions.delete(scanRunId);
+
+            // Also try to clean up the dead container by name
+            try {
+                const staleContainer = this.docker.getContainer(this.getSessionName(scanRunId));
+                await staleContainer.remove({ force: true });
+            } catch {
+                // Container may already be fully gone — ignore
+            }
+
+            // Start a fresh session
+            console.log(`[SESSION] ⚠️ Container missing. Starting fresh session for ${scanRunId}`);
+            return this.startSession(scanRunId);
+        }
+    }
+
+    /**
      * End a session container (called at Stage 9 or on failure)
      */
     public async endSession(scanRunId: string): Promise<void> {

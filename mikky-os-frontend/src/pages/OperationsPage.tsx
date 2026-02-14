@@ -8,9 +8,13 @@ import { api } from '../../convex/_generated/api';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Clock, Target, Shield, AlertCircle } from 'lucide-react';
+import { Search, Clock, Target, Shield, AlertCircle, ExternalLink } from 'lucide-react';
+import { DownloadReportButton } from '@/components/reports/DownloadReportButton';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function OperationsPage() {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -193,12 +197,13 @@ export function OperationsPage() {
                                 <th className="text-right py-3 px-4 text-xs font-mono uppercase text-zinc-500">Safety</th>
                                 <th className="text-right py-3 px-4 text-xs font-mono uppercase text-zinc-500">Ports</th>
                                 <th className="text-right py-3 px-4 text-xs font-mono uppercase text-zinc-500">Vulns</th>
+                                <th className="text-right py-3 px-4 text-xs font-mono uppercase text-zinc-500">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredScans.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="text-center py-12 text-zinc-500 font-mono text-sm">
+                                    <td colSpan={9} className="text-center py-12 text-zinc-500 font-mono text-sm">
                                         No scan runs found
                                     </td>
                                 </tr>
@@ -242,6 +247,22 @@ export function OperationsPage() {
                                         </td>
                                         <td className="py-3 px-4 text-right">
                                             <span className="text-zinc-400 text-sm">{scan.vulnCount || 0}</span>
+                                        </td>
+                                        <td className="py-3 px-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                {scan.status === 'completed' && (
+                                                    <DownloadReportButton scanId={scan._id} />
+                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => navigate('/targets')}
+                                                    className="border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 font-mono text-xs"
+                                                >
+                                                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                                                    Target
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

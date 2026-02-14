@@ -10,7 +10,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 
 interface UserMenuProps {
     onLogout?: () => void;
@@ -19,6 +20,17 @@ interface UserMenuProps {
 
 export function UserMenu({ onLogout, isCollapsed = false }: UserMenuProps) {
     const { user, isLoaded } = useUser();
+    const { signOut } = useClerk();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        onLogout?.();
+        signOut({ redirectUrl: '/' });
+    };
+
+    const handleProfile = () => {
+        navigate('/profile');
+    };
 
     if (!isLoaded) {
         return (
@@ -79,12 +91,15 @@ export function UserMenu({ onLogout, isCollapsed = false }: UserMenuProps) {
             >
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-zinc-800" />
-                <DropdownMenuItem className="focus:bg-zinc-900 focus:text-cyan-400 cursor-pointer">
+                <DropdownMenuItem
+                    onClick={handleProfile}
+                    className="focus:bg-zinc-900 focus:text-cyan-400 cursor-pointer"
+                >
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    onClick={onLogout}
+                    onClick={handleLogout}
                     className="text-red-400 focus:text-red-300 focus:bg-red-950/20 cursor-pointer"
                 >
                     <LogOut className="mr-2 h-4 w-4" />

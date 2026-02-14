@@ -1,40 +1,22 @@
-# MIKKY OS Worker Node
+# Mikky OS Worker (The Armory) 🛡️
 
-Dockerized Kali Linux security scanning runtime for MIKKY OS.
+**"Where the rubber meets the road."**
 
-## Building the Image
+This module manages the **Docker Containers** that execute the actual security tools. 
 
-```bash
-docker build -t mikky-worker .
-```
+## 🐳 Why Docker?
+Security tools like `nmap` and `nuclei` can be dangerous or unstable. Running them directly on the host is risky.
+Mikky OS spins up ephemeral containers for every job, ensuring:
+1.  **Isolation**: Crashes don't affect the main OS.
+2.  **Security**: Malformed payloads can't escape the container.
+3.  **Clean State**: Every scan starts fresh.
 
-## Testing
+## 🛠️ The Toolkit
+The worker image includes:
+- `nmap`
+- `masscan`
+- `nuclei`
+- `subfinder`
+- Python & Node.js runtimes
 
-```bash
-# Test nmap
-docker run --rm mikky-worker "nmap --version"
-
-# Test whois
-docker run --rm mikky-worker "whois --version"
-
-# Test dig
-docker run --rm mikky-worker "dig -v"
-
-# Test curl
-docker run --rm mikky-worker "curl --version"
-```
-
-## Installed Tools
-
-- **nmap** - Network exploration and security auditing
-- **whois** - Domain registration information
-- **dnsutils** (dig, nslookup) - DNS queries
-- **curl** - HTTP client
-- **wget** - File retrieval
-- **netcat** - Network debugging
-
-## Security
-
-- Runs as non-root user `scanner`
-- Ephemeral containers (destroyed after each task)
-- No persistent storage
+*Note: Requires Docker Daemon to be running.*
