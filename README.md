@@ -1,12 +1,12 @@
-MIKKY OS 🛡️
+# MIKKY OS 🛡️
 AI-Powered Offensive Security Operations Center
 
-"The Matrix has you... unless you hack it first." 🕶️
+> "The Matrix has you... unless you hack it first." 🕶️
 
-⚡ TL;DR (For Pro Developers)
-If you already have Node, Docker, and standard dev tools:
+## ⚡ TL;DR (For Pro Developers)
+If you have Node.js and Docker installed, just run this:
 
-Bash
+```bash
 # 1. Clone & Install
 git clone https://github.com/Neoujne/mikky-os.git
 cd mikky-os
@@ -14,130 +14,98 @@ npm install
 
 # 2. Setup Env
 cp .env.example .env
-# Fill in: OPENROUTER_API_KEY, CONVEX_URL, CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+# Fill in: OPENROUTER_API_KEY, CONVEX_URL, CLERK Keys
 
 # 3. Launch
 npm run dev:all
-🔰 Absolute Beginner's Guide (Start Here)
-New to development? No problem. Follow these steps to get Mikky OS running on your machine in 5 minutes.
+```
 
-1. Install Prerequisites
-Before you start, you need these tools installed on your computer.
+## 🔰 Absolute Beginner's Guide (Start Here)
+New to coding? Follow these exact steps to run Mikky OS in 5 minutes.
 
-Node.js (Version 18 or higher): The engine that runs the code.
+### 1. Install Prerequisites
+You need these three tools installed on your computer first:
 
-👉 Download Node.js Here (Choose "LTS" version).
+- **Node.js (v18+)**: The engine that runs the app.
+  👉 [Download Node.js (LTS Version)](https://nodejs.org/)
 
-Verify: Open your terminal and type node -v.
+- **Git**: To download the source code.
+  👉 [Download Git](https://git-scm.com/)
 
-Git: To download the code.
+- **Docker Desktop**: Required for the security scanners.
+  👉 [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-👉 Download Git Here.
+> **Important:** Open Docker Desktop after installing and let it run in the background.
 
-Docker Desktop: Required for the security scanning worker nodes.
+### 2. Download the Project
+Open your terminal (Command Prompt or PowerShell on Windows, Terminal on Mac) and run:
 
-👉 Download Docker Desktop.
-
-Important: Install it and start the app so it's running in the background.
-
-2. Get the Code
-Open your terminal (Command Prompt on Windows, Terminal on Mac) and run:
-
-Bash
+```bash
 git clone https://github.com/Neoujne/mikky-os.git
 cd mikky-os
-3. Install Dependencies
-This downloads all the libraries Mikky OS needs to run.
+```
 
-Bash
+### 3. Install Dependencies
+This command downloads all the required libraries:
+
+```bash
 npm install
-(This might take a minute. If you see warnings, don't worry, just wait for it to finish.)
+```
 
-4. The Keys to the Kingdom (Configuration)
-Mikky OS uses powerful AI and Database tools. You need to give it access keys.
+### 4. Configuration (The Keys)
+Mikky OS needs API keys to work.
 
-Create the Environment File:
-
-Copy the example file to a real settings file.
-
-Bash
+**Create Settings File:**
+```bash
 cp .env.example .env
-(On Windows, you might need to manually rename .env.example to .env in your folder).
+```
+*(If that command fails on Windows, just manually rename the file `.env.example` to `.env`)*
 
-Get Your Free Keys:
-Open the .env file in any text editor (Notepad, VS Code) and fill in these values:
+**Add Your Keys:**
+Open the `.env` file and paste your keys:
 
-OPENROUTER_API_KEY: Sign up at OpenRouter.ai. This powers the AI Consultant.
+- **OPENROUTER_API_KEY**: Get it from [OpenRouter.ai](https://openrouter.ai/) (Required for AI Chat).
+- **CLERK_PUBLISHABLE_KEY**: Get it from [Clerk.com](https://clerk.com/) (Required for Login).
+- **CONVEX_DEPLOYMENT**: Run `npx convex dev` in the terminal to set this up automatically.
 
-CLERK_PUBLISHABLE_KEY & SECRET_KEY: Sign up at Clerk.com. Create a new app (select "Email/Password" login). Copy the keys from the dashboard.
+### 5. 🚀 Launch the System
+Run this single command to start everything:
 
-CONVEX_DEPLOYMENT: Run npx convex dev in your terminal once. It will guide you through logging in and automatically configure this for you!
-
-5. 🚀 Launch System
-This is the magic moment. Run this single command to start the Frontend, Backend, Database, and AI Agents all at once:
-
-Bash
+```bash
 npm run dev:all
-Wait until you see: ➜  Local:   http://localhost:5173/
+```
+Wait until you see the link `http://localhost:5173`. Click it to open the app!
 
-Open that link in your browser.
+## 🚀 Features
 
-Welcome to the Future.
+### 🤖 Source Code Audit [NEW]
+**AI-Driven SAST Engine.**
 
-🌆 The Vibe
-Mikky OS isn't just a tool; it's an experience.
+- **What it does**: Scans GitHub repositories for security flaws without downloading the whole history.
+- **How to use**: Paste a GitHub URL (e.g., `https://github.com/owner/repo`) and click Scan.
+- **Output**: A list of Critical/High vulnerabilities with exact file locations.
 
-Cyberpunk Mode: Neon Cyan/Purple, Matrix rain aesthetics. (Default)
+### 💬 AI Security Consultant [NEW]
+**Interactive Remediation Chat.**
 
-Stealth Mode: Green/Black terminal vibes.
+- **What it does**: Allows you to talk to your codebase.
+- **Example**: Ask "How do I fix this SQL Injection?" and the AI will write the secure code for you.
 
-Toggle: Go to Settings to switch vibes instantly.
+### 🕸️ Network Recon
+- **Active Surveillance**: Uses Nmap & Masscan to find open ports and attack surfaces.
+- **Real-time**: Results stream directly to your dashboard.
 
-🚀 Features (The "Meat")
-🕸️ Network Recon & Surveillance
-Active monitoring engine that orchestrates Nmap, Masscan, and Subfinder to map attack surfaces in real-time. Results are streamed live to your dashboard via WebSockets.
+## 🏗️ Tech Stack
+- **Frontend**: React, Vite, TailwindCSS (Cyberpunk Theme)
+- **Backend**: Node.js, Express
+- **Orchestration**: Inngest (Event-Driven Architecture)
+- **Database**: Convex (Real-time Sync)
+- **AI**: OpenRouter (DeepSeek, Gemini, Claude)
 
-🧪 Vulnerability Lab
-Integrated Nuclei engine capabilities. Detects CVEs, misconfigurations, and exposed panels. The system automatically categorizes findings by severity (CRITICAL to INFO).
+## ❓ Troubleshooting
+- **"Command not found: docker"**: Ensure Docker Desktop is running.
+- **"Missing Environment Variables"**: Check your `.env` file.
+- **"Port 5173 in use"**: Another app is using the port. The terminal will ask to use a different one—just type `y`.
 
-🤖 Source Code Audit [NEW]
-AI-Driven SAST Engine. Paste a GitHub URL, and Mikky OS will:
-
-Fetch the repository structure (no git clone required).
-
-Identify high-risk files (Auth logic, API configs, Cryptography).
-
-"Read" the code using Large Language Models (LLMs).
-
-Produce a detailed vulnerability report with fixed code snippets.
-
-💬 AI Security Consultant [NEW]
-Interactive Remediation Chat. Found a vulnerability? Don't just stare at it.
-
-Ask: "How do I fix this SQL Injection?"
-
-Ask: "Why is this regex dangerous?"
-
-Result: The AI analyzes your specific codebase and writes a secure patch for you live.
-
-🏗️ Architecture
-Built on a robust Event-Driven Architecture for maximum reliability:
-
-Orchestration: Inngest (Manages the AI Agents workflow).
-
-Real-time DB: Convex (Syncs data between backend and UI instantly).
-
-Frontend: React + Vite + TailwindCSS + Shadcn UI.
-
-AI: OpenRouter (DeepSeek, Gemini, Claude).
-
-Containerization: Docker (For safe execution of scanning tools).
-
-❓ Troubleshooting
-"Command not found: docker": Make sure Docker Desktop is installed and running.
-
-"Missing Environment Variables": Double-check your .env file. Did you save it?
-
-"Port 5173 already in use": You might have another app running. The terminal will usually ask to try a different port (type y).
-
-Built for the Vibeathon. Hacking the planet, one repo at a time. 💀
+---
+*Built for the Vibeathon. Hacking the planet, one repo at a time.* 💀
