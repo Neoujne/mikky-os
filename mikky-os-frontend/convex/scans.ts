@@ -153,8 +153,8 @@ export const updateStatus = mutation({
         // 2. Verify existence
         const existing = await ctx.db.get(scanId);
         if (!existing) {
-            console.log(`Failed to find scanRun with ID: ${scanId}`);
-            throw new Error(`Scan run not found: ${id}`);
+            console.log(`[CONVEX] Scan ${id} not found (likely deleted). Skipping update.`);
+            return; // Graceful exit for deleted scans
         }
 
         // 3. Build type-safe updates object
@@ -263,8 +263,15 @@ export const deleteScanRun = mutation({
     handler: async (ctx, args) => {
         const scan = await ctx.db.get(args.id);
         if (!scan) {
-            throw new Error(`Scan not found: ${args.id}`);
+            // Already gone
+            return;
         }
+
+        // If it was running, we should log that we are force-deleting it
+        if (scan.status === "scanning" || scan.status === "queued") {
+            console.log(`[CONVEX] Force-deleting running scan: ${args.id}`);
+        }
+
         await ctx.db.delete(args.id);
     },
 });
