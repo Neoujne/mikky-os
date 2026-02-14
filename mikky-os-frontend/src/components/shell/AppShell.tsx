@@ -12,14 +12,12 @@ interface AppShellProps {
     children: React.ReactNode;
     onLogout?: () => void;
     onEngage?: () => void;
-    activeScans?: any[];
 }
 
 export function AppShell({
     children,
     onLogout,
     onEngage,
-    activeScans = [],
 }: AppShellProps) {
     const [isConsoleOpen, setIsConsoleOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -154,56 +152,56 @@ export function AppShell({
                         )}
                     </button>
 
-        </aside>
+                </aside>
 
-                {/* Main Content Area */ }
-    <main
-        className={cn(
-            'flex-1 overflow-auto transition-all duration-300 flex flex-col',
-            isCollapsed ? 'lg:pl-16' : 'lg:pl-64', // Offset for fixed sidebar
-            isConsoleOpen ? 'pb-[300px]' : 'pb-12' // Offset for bottom console
-        )}
-    >
-        <div className="container mx-auto p-6 md:p-8 lg:p-10 max-w-7xl animate-in fade-in duration-500">
-            {children}
-        </div>
-    </main>
+                {/* Main Content Area */}
+                <main
+                    className={cn(
+                        'flex-1 overflow-auto transition-all duration-300 flex flex-col',
+                        isCollapsed ? 'lg:pl-16' : 'lg:pl-64', // Offset for fixed sidebar
+                        isConsoleOpen ? 'pb-[300px]' : 'pb-12' // Offset for bottom console
+                    )}
+                >
+                    <div className="container mx-auto p-6 md:p-8 lg:p-10 max-w-7xl animate-in fade-in duration-500">
+                        {children}
+                    </div>
+                </main>
 
-    {/* Quake Console Drawer */ }
-    <div
-        className={cn(
-            'fixed bottom-0 right-0 z-30 bg-zinc-950 border-t border-zinc-800 shadow-2xl transition-all duration-300 ease-in-out flex flex-col font-mono',
-            isCollapsed ? 'lg:left-16' : 'lg:left-64', // Match sidebar offset on desktop
-            'left-0',
-            isConsoleOpen ? 'h-[300px]' : 'h-10'
-        )}
-    >
-        {/* Console Header/Handle */}
-        <div
-            className="h-10 flex items-center justify-between px-4 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer border-b border-zinc-800 select-none"
-            onClick={() => setIsConsoleOpen(!isConsoleOpen)}
-        >
-            <div className="flex items-center gap-2 text-zinc-400 text-xs tracking-wider uppercase">
-                <Terminal className="h-4 w-4 text-emerald-500" />
-                <span>System Console</span>
-            </div>
-            <div className="flex items-center gap-2">
-                <span className="text-[10px] text-zinc-600 hidden sm:inline-block">CTRL+J to toggle</span>
-                {isConsoleOpen ? (
-                    <ChevronDown className="h-4 w-4 text-zinc-500" />
-                ) : (
-                    <ChevronUp className="h-4 w-4 text-zinc-500" />
-                )}
-            </div>
-        </div>
+                {/* Quake Console Drawer */}
+                <div
+                    className={cn(
+                        'fixed bottom-0 right-0 z-30 bg-zinc-950 border-t border-zinc-800 shadow-2xl transition-all duration-300 ease-in-out flex flex-col font-mono',
+                        isCollapsed ? 'lg:left-16' : 'lg:left-64', // Match sidebar offset on desktop
+                        'left-0',
+                        isConsoleOpen ? 'h-[300px]' : 'h-10'
+                    )}
+                >
+                    {/* Console Header/Handle */}
+                    <div
+                        className="h-10 flex items-center justify-between px-4 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer border-b border-zinc-800 select-none"
+                        onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+                    >
+                        <div className="flex items-center gap-2 text-zinc-400 text-xs tracking-wider uppercase">
+                            <Terminal className="h-4 w-4 text-emerald-500" />
+                            <span>System Console</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-zinc-600 hidden sm:inline-block">CTRL+J to toggle</span>
+                            {isConsoleOpen ? (
+                                <ChevronDown className="h-4 w-4 text-zinc-500" />
+                            ) : (
+                                <ChevronUp className="h-4 w-4 text-zinc-500" />
+                            )}
+                        </div>
+                    </div>
 
-        {/* Console Output - Use Real SystemConsole */}
-        {isConsoleOpen && (
-            <div className="flex-1 overflow-hidden">
-                <TerminalNexus />
-            </div>
-        )}
-    </div>
+                    {/* Console Output - Use Real SystemConsole */}
+                    {isConsoleOpen && (
+                        <div className="flex-1 overflow-hidden">
+                            <TerminalNexus />
+                        </div>
+                    )}
+                </div>
             </div >
         </div >
     );
