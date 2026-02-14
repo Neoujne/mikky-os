@@ -6,9 +6,9 @@
 import { Navbar } from '@/components/layout';
 import { useState } from 'react';
 import {
-    Book, Rocket, Settings, Code, HelpCircle, ChevronRight,
+    Book, Rocket, Settings,
     Shield, Zap, Cpu, Network, Bot, Container, Terminal,
-    Layers, Activity, FileCode2, MessageSquare, Brain
+    Activity, FileCode2, MessageSquare, Brain
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
