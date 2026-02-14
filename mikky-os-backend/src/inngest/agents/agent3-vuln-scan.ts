@@ -240,6 +240,14 @@ export const agent3VulnScan = inngest.createFunction(
         // =====================================================================
         const targetId = await step.run('agent3-resolve-target', async () => {
             try {
+                // Robust: Get targetId directly from the scan run record
+                const scan = await convex.query('scans:getById' as any, { id: scanRunId });
+                if (scan && scan.targetId) {
+                    return scan.targetId;
+                }
+
+                // Fallback: Query by domain (legacy)
+                console.warn('[AGENT3] Could not get targetId from scan, trying domain lookup...');
                 const target = await convex.query('targets:getByDomain' as any, { domain });
                 return target?._id || null;
             } catch (e) {
@@ -254,8 +262,9 @@ export const agent3VulnScan = inngest.createFunction(
         const nucleiResults = await step.run('agent3-nuclei', async () => {
             console.log('[AGENT3] Running Nuclei vulnerability scan...');
 
+            // USE JSONL OUTPUT for reliable parsing
             const nucleiResult = await runWithRecovery({
-                command: `nuclei -u https://${domain} -severity low,medium,high -silent -timeout 2 -retries 1 -rate-limit 25 2>/dev/null | head -50`,
+                command: `nuclei -u https://${domain} -severity low,medium,high -jsonl -timeout 5 -retries 1 -rate-limit 25 2>/dev/null | head -50`,
                 scanRunId,
                 stage: 'vuln_scanning',
                 tool: 'nuclei',
