@@ -255,6 +255,20 @@ export const stopBatch = mutation({
     },
 });
 
+// Delete a scan run permanently
+export const deleteScanRun = mutation({
+    args: {
+        id: v.id("scanRuns"),
+    },
+    handler: async (ctx, args) => {
+        const scan = await ctx.db.get(args.id);
+        if (!scan) {
+            throw new Error(`Scan not found: ${args.id}`);
+        }
+        await ctx.db.delete(args.id);
+    },
+});
+
 // Engage (restart) multiple scans at once
 export const engageBatch = mutation({
     args: {

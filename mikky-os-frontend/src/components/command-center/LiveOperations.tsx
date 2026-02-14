@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Clock, Shield, Wifi, AlertTriangle, FileText } from 'lucide-react';
+import { ChevronRight, Clock, Shield, Wifi, AlertTriangle, FileText, Trash2 } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import type { StageStatus, LiveOperationsProps, ActiveScan } from '@/types/command-center';
 import { MissionReport } from './MissionReport';
 import { DownloadReportButton } from '@/components/reports/DownloadReportButton';
@@ -99,6 +101,15 @@ function ReportTrigger({ scan }: { scan: ActiveScan }) {
 }
 
 export function LiveOperations({ activeScans, onSelectScan }: LiveOperationsProps) {
+    const deleteScan = useMutation(api.scans.deleteScanRun);
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this scan?')) {
+            await deleteScan({ id: id as any });
+        }
+    };
+
     if (activeScans.length === 0) {
         return (
             <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/20 p-8 text-center">
@@ -147,6 +158,15 @@ export function LiveOperations({ activeScans, onSelectScan }: LiveOperationsProp
                                             <DownloadReportButton scanId={scan._id} />
                                         </>
                                     )}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-zinc-600 hover:text-rose-500 hover:bg-rose-500/10"
+                                        onClick={(e) => handleDelete(e, scan._id)}
+                                        title="Delete Scan"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
                                     <div
                                         className="flex items-center gap-2 text-cyan-400 text-xs font-bold font-mono cursor-pointer"
                                         onClick={() => onSelectScan?.(scan._id)}
