@@ -24,6 +24,62 @@ npm run dev:all
 
 ---
 
+## 🔰 Absolute Beginner's Guide
+
+New to development? No problem. Follow these steps to get Mikky OS running on your machine.
+
+### 1. Install Prerequisites
+You need these tools installed on your computer first:
+
+- **Node.js**: The engine that runs the code.
+  - [Download Node.js](https://nodejs.org/) (Choose "LTS")
+  - *Verify*: Open terminal and type `node -v`
+
+- **Git**: To download the source code.
+  - [Download Git](https://git-scm.com/downloads)
+  - *Verify*: Open terminal and type `git --version`
+
+- **Docker Desktop**: Required for security scanners.
+  - [Download Docker](https://www.docker.com/products/docker-desktop/)
+  - *Important*: Open Docker Desktop after installing and let it run in the background.
+
+### 2. Get the Code
+Open your terminal (Command Prompt/PowerShell on Windows, Terminal on Mac) and run:
+
+```bash
+git clone https://github.com/Neoujne/mikky-os.git
+cd mikky-os
+```
+
+### 3. Install Dependencies
+This downloads all the libraries Mikky OS needs:
+
+```bash
+npm install
+```
+
+### 4. Configuration
+Mikky OS needs API keys.
+
+**Create Settings File:**
+```bash
+cp .env.example .env
+```
+*(Windows users: manually rename `.env.example` to `.env` if the command fails)*
+
+**Add Keys:** Open `.env` and fill in:
+- `OPENROUTER_API_KEY`: [Get API Key](https://openrouter.ai/) (For AI Chat)
+- `CLERK_PUBLISHABLE_KEY`: [Get Keys](https://clerk.com/) (For Login)
+- `CONVEX_DEPLOYMENT`: Run `npx convex dev` to set this up automatically.
+
+### 5. Launch
+```bash
+npm run dev:all
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
 ## 🌆 The Vibe
 
 Mikky OS isn't just a tool; it's an experience. Toggle between **Cyberpunk Mode** (Neon Cyan/Purple, Matrix rain aesthetics) and **Stealth Mode** (Green/Black terminal vibes) instantly. 
