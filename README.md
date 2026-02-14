@@ -10,15 +10,20 @@
 ## ⚡ Quick Start
 
 ```bash
-# 1. Clone & Install
+# 1. Install & Setup
 git clone https://github.com/Neoujne/mikky-os.git
 cd mikky-os
 npm install
-
-# 2. Configure Environment
 cp .env.example .env
 
-# 3. Launch System
+# 2. Terminal A (The Bridge)
+npx ngrok http 5000
+# -> Copy the forwarding URL (e.g., https://a1b2.ngrok-free.app)
+
+# 3. Terminal B (The System)
+cd mikky-os-frontend
+npx convex env set MIKKY_BACKEND_URL [PASTE_URL_HERE]
+cd ..
 npm run dev:all
 ```
 
@@ -26,7 +31,7 @@ npm run dev:all
 
 ## 🔰 Absolute Beginner's Guide
 
-New to development? No problem. Follow these steps to get Mikky OS running on your machine.
+New to development? Follow these steps to get Mikky OS running on your machine.
 
 ### 1. Install Prerequisites
 You need these tools installed on your computer first:
@@ -43,22 +48,20 @@ You need these tools installed on your computer first:
   - [Download Docker](https://www.docker.com/products/docker-desktop/)
   - *Important*: Open Docker Desktop after installing and let it run in the background.
 
-### 2. Get the Code
-Open your terminal (Command Prompt/PowerShell on Windows, Terminal on Mac) and run:
+- **Ngrok**: Required to expose the backend to the cloud database.
+  - [Sign up & Install Ngrok](https://ngrok.com/download)
+  - *Verify*: Open terminal and type `ngrok version`
+
+### 2. Get the Code & Install
+Open a terminal (Terminal 1) and run:
 
 ```bash
 git clone https://github.com/Neoujne/mikky-os.git
 cd mikky-os
-```
-
-### 3. Install Dependencies
-This downloads all the libraries Mikky OS needs:
-
-```bash
 npm install
 ```
 
-### 4. Configuration
+### 3. Configuration
 Mikky OS needs API keys.
 
 **Create Settings File:**
@@ -72,11 +75,30 @@ cp .env.example .env
 - `CLERK_PUBLISHABLE_KEY`: [Get Keys](https://clerk.com/) (For Login)
 - `CONVEX_DEPLOYMENT`: Run `npx convex dev` to set this up automatically.
 
-### 5. Launch
-```bash
-npm run dev:all
-```
-Open `http://localhost:5173` in your browser.
+### 4. Launch Protocol (The Tunnel)
+We need to connect your local backend to the internet.
+
+1. Open a **NEW Terminal** (Terminal A).
+2. Run this command to start the tunnel:
+   ```bash
+   npx ngrok http 5000
+   ```
+3. Look for the **Forwarding** line. It will look like: `https://a1b2-c3d4.ngrok-free.app`.
+4. **Copy that URL.** Keep this terminal open!
+
+### 5. Launch System (The Brain)
+1. Go back to your **FIRST Terminal** (Terminal B).
+2. Tell the database where your tunnel is (replace `[PASTE_URL]` with your copied URL):
+   ```bash
+   cd mikky-os-frontend
+   npx convex env set MIKKY_BACKEND_URL [PASTE_URL]
+   cd ..
+   ```
+3. Start the system:
+   ```bash
+   npm run dev:all
+   ```
+4. Open `http://localhost:5173` in your browser.
 
 ---
 
