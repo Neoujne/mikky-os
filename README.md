@@ -183,7 +183,7 @@ cd mikky-os-backend && cp ../.env.example .env
 cd ../mikky-os-worker && docker build -t mikky-worker:latest .
 
 # Start ngrok tunnel (new terminal, keep running)
-ngrok http 5000
+npx ngrok http 5000
 # -> Copy forwarding URL (e.g. https://abc123.ngrok-free.app)
 
 # Tell Convex about your tunnel
